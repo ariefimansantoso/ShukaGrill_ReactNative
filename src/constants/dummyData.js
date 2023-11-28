@@ -1,0 +1,243 @@
+var ActiveMenu = {
+    id: string,
+    name: string,       
+    price: Number,
+    rating: Number,
+    image: string,
+    description: string,
+    priceChildren: Number,
+    priceSenior: Number,
+    MinPax: Number
+};
+
+/* const dishes = [
+    {
+        id: "1",
+        name: "Paket Spesial",       
+        price: 159000,
+        rating: 4.5,
+        image: "https://www.shukagrill.com/backend/Content/images/banner/spesial.png",
+        description:
+            "Paket standar+all you can eat. Rosu Shabu. Negi Karubi, Spicy Karubi, Garlic Karubi, Rosu, Prawn, Salmon Mentai Roll",
+        priceChildren: 99000,
+        priceSenior: 139000,
+        MinPax: 1
+    },
+    {
+        id: "2",
+        name: "Paket Epic",
+        price: 179000,
+        rating: 4.5,
+        image: "https://www.shukagrill.com/backend/Content/images/banner/epic.png",
+        description:
+            "Paket spesial+all you can eat, Beef Tongue, Negi Beef Tongue, Spicy Beef Tongue, Saikoro",
+        priceChildren: 99000,
+        priceSenior: 149000,
+        MinPax: 1
+    },
+    {
+        id: "3",
+        name: "Paket Premium",
+        price: 199000,
+        rating: 4.5,
+        image: "https://www.shukagrill.com/backend/Content/images/banner/premium.png",
+        description:
+            "Paket spesial+all you can eat, Shukaku Wagyu Karubi, Short Ribs Karubi, Beef Tongue, Shukaku Steak, Saikoro, Assorted Sushi: Crunchy Unagi, Salmon Mentai Roll",
+        priceChildren: 99000,
+        priceSenior: 159000,
+        MinPax: 1
+    },
+    {
+        id: "4",
+        name: "Paket Ultimate",
+        price: 249000,
+        rating: 4.5,
+        image: "https://www.shukagrill.com/backend/Content/images/banner/ultimate.png",
+        description:
+            "Paket premium+all you can eat, US Prime Karubi, US Prime Shabu, Ultimate Udon With Wagyu, Sushi Crunchy Wagyu Aburi Roll, Yakiniku Prime Beef, Volcano Wagyu Nigiri, Special Mochi For You, Sakura Jelly (harga sebelum pajak+servis)",
+        priceChildren: 99000,
+        priceSenior: 199000,
+        MinPax: 1
+    },
+]; */
+
+const dummyData = [
+    {
+        id: "1",
+        name: "Filada Family bar",
+        tags: [
+            {
+                id: 1,
+                tag: "Burger",
+                color: "#FFC700",
+                backgroundColor: "#FFFAE7",
+            },
+            {
+                id: 2,
+                tag: "Pizza",
+                color: "#FE2121",
+                backgroundColor: "#FFE9E9",
+            },
+            {
+                id: 3,
+                tag: "Fast Food",
+                color: "#1DBF73",
+                backgroundColor: "#E8F9F1",
+            },
+        ],
+        description:
+            "Et quis amet laboris mollit eu nostrud exercitation. Qui ex aute ipsum duis. Incididunt adipisicing adipisicing voluptate laborum tempor dolor deserunt exercitation in officia minim elit. Aute exercitation Lorem consequat fugiat id ut.",
+        address: "2464 Royal Ln. Mesa, New Jersey 45463",
+        email: "desertshow@mail.com",
+        distance: "0.2 km - $$",
+        image: require("../assets/images/restaurants/restaurant-01.png"),
+        hotOffer: require("../assets/images/restaurants/restaurant-01-hot-offer.png"),
+        backgroundImage: require("../assets/images/restaurants/restaurant-01-background.png"),
+        icon: require("../assets/images/restaurants/restaurant-01-icon.png"),
+        rating: "4.0",
+        numberOfRatings: "20",
+        popular: true,
+        freeDelivery: true,
+        timeOfDelivery: "30-45 Min",
+        near: true,
+        freeDeliveryFrom: "200",
+        distance: "0.2 km",
+        type: "Bakery",
+        phone: "+1 387 456 88 74",
+        dishes,
+    },
+    {
+        id: "2",
+        name: "Chiken taste",
+        tags: [
+            {
+                id: 1,
+                tag: "Burger",
+                color: "#FFC700",
+                backgroundColor: "#FFFAE7",
+            },
+            {
+                id: 2,
+                tag: "Pizza",
+                color: "#FE2121",
+                backgroundColor: "#FFE9E9",
+            },
+            {
+                id: 3,
+                tag: "Fast Food",
+                color: "#1DBF73",
+                backgroundColor: "#E8F9F1",
+            },
+        ],
+        description:
+            "Et quis amet laboris mollit eu nostrud exercitation. Qui ex aute ipsum duis. Incididunt adipisicing adipisicing voluptate laborum tempor dolor deserunt exercitation in officia minim elit. Aute exercitation Lorem consequat fugiat id ut.",
+        address: "2464 Royal Ln. Mesa, New Jersey 45463",
+        email: "desertshow@mail.com",
+        distance: "0.2 km - $$",
+        image: require("../assets/images/restaurants/restaurant-02.png"),
+        hotOffer: require("../assets/images/restaurants/restaurant-02-hot-offer.png"),
+        backgroundImage: require("../assets/images/restaurants/restaurant-01-background.png"),
+        icon: require("../assets/images/restaurants/restaurant-01-icon.png"),
+        rating: "3.5",
+        numberOfRatings: "24",
+        popular: true,
+        freeDelivery: true,
+        timeOfDelivery: "20-35 Min",
+        near: true,
+        freeDeliveryFrom: "300",
+        distance: "0.3 km",
+        type: "Bakery",
+        phone: "+1 387 456 88 74",
+        dishes,
+    },
+    {
+        id: "3",
+        name: "Rolls & rolls",
+        tags: [
+            {
+                id: 1,
+                tag: "Burger",
+                color: "#FFC700",
+                backgroundColor: "#FFFAE7",
+            },
+            {
+                id: 2,
+                tag: "Pizza",
+                color: "#FE2121",
+                backgroundColor: "#FFE9E9",
+            },
+            {
+                id: 3,
+                tag: "Fast Food",
+                color: "#1DBF73",
+                backgroundColor: "#E8F9F1",
+            },
+        ],
+        description:
+            "Et quis amet laboris mollit eu nostrud exercitation. Qui ex aute ipsum duis. Incididunt adipisicing adipisicing voluptate laborum tempor dolor deserunt exercitation in officia minim elit. Aute exercitation Lorem consequat fugiat id ut.",
+        address: "2464 Royal Ln. Mesa, New Jersey 45463",
+        email: "desertshow@mail.com",
+        distance: "0.2 km - $$",
+        image: require("../assets/images/restaurants/restaurant-03.png"),
+        hotOffer: require("../assets/images/restaurants/restaurant-03-hot-offer.png"),
+        backgroundImage: require("../assets/images/restaurants/restaurant-01-background.png"),
+        icon: require("../assets/images/restaurants/restaurant-01-icon.png"),
+        rating: "3.0",
+        numberOfRatings: "15",
+        popular: true,
+        freeDelivery: true,
+        timeOfDelivery: "25-40 Min",
+        near: true,
+        freeDeliveryFrom: "400",
+        distance: "0.4 km",
+        type: "Bakery",
+        phone: "+1 387 456 88 74",
+        dishes,
+    },
+    {
+        id: "4",
+        name: "National rest",
+        tags: [
+            {
+                id: 1,
+                tag: "Burger",
+                color: "#FFC700",
+                backgroundColor: "#FFFAE7",
+            },
+            {
+                id: 2,
+                tag: "Pizza",
+                color: "#FE2121",
+                backgroundColor: "#FFE9E9",
+            },
+            {
+                id: 3,
+                tag: "Fast Food",
+                color: "#1DBF73",
+                backgroundColor: "#E8F9F1",
+            },
+        ],
+        description:
+            "Et quis amet laboris mollit eu nostrud exercitation. Qui ex aute ipsum duis. Incididunt adipisicing adipisicing voluptate laborum tempor dolor deserunt exercitation in officia minim elit. Aute exercitation Lorem consequat fugiat id ut.",
+        address: "2464 Royal Ln. Mesa, New Jersey 45463",
+        email: "desertshow@mail.com",
+        distance: "0.2 km - $$",
+        image: require("../assets/images/restaurants/restaurant-04.png"),
+        hotOffer: require("../assets/images/restaurants/restaurant-03-hot-offer.png"),
+        backgroundImage: require("../assets/images/restaurants/restaurant-01-background.png"),
+        icon: require("../assets/images/restaurants/restaurant-01-icon.png"),
+        rating: "2.5",
+        numberOfRatings: "33",
+        popular: true,
+        freeDelivery: true,
+        timeOfDelivery: "40-50 Min",
+        near: false,
+        freeDeliveryFrom: "500",
+        distance: "0.5 km",
+        type: "Bakery",
+        phone: "+1 387 456 88 74",
+        dishes,
+    },
+];
+
+export { dummyData };

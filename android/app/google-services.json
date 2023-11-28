@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "531501383860",
+    "project_id": "shuka-grill",
+    "storage_bucket": "shuka-grill.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:531501383860:android:5ec2b93f794eeeab7757e1",
+        "android_client_info": {
+          "package_name": "com.shukagrill.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "531501383860-ejt27c9qkhe0699b954dpmp882rrasmo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shukagrill.app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "531501383860-uoebtfaqee29oe69r46tl4a6ndr95ike.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-cvmBOwq0uvar2XJMU7--zSmhv5NT6VE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "531501383860-rakg4pcm4mjoa759b6aop5hbatnatt95.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
