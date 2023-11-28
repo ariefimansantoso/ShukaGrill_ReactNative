@@ -16,7 +16,7 @@ import DashedLine from "react-native-dashed-line";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Shadow } from "react-native-shadow-2";
 import NumericInput from 'react-native-numeric-input'
-import { SelectList } from 'react-native-dropdown-select-list'
+import { SelectList } from 'react-native-dropdown-select-list';
 
 import {
     Header,
@@ -53,6 +53,7 @@ export default function Order(menuId){
     const [branches, setBranches] = useState([]);
     const [selectedBranch, setSelectedBranch] = React.useState("");
     const [selectedMenu, setSelectedMenu] = useState({});    
+    const [dataFetched, setDataFetched] = useState(false);
 
     const httpHeader = {   
         method: "GET",       
@@ -60,13 +61,48 @@ export default function Order(menuId){
     };
 
     if(menuId) {
-        console.log("menuId: " + menuId.menuId);
-        console.log(menuId);
-    }
+        console.log("menuId: " + menuId.route.params.menuId);
+        console.log(menuId.route.params.menuId);        
+    }    
+
+    useEffect(() => {
+        if(dataFetched == true){
+            return;
+        }
+
+        const fetchData = async() => {
+            console.log("useEffect");
+            // branches
+            const requestMenuUrl = baseUrl + '/api/Menu/GetMenu?id=' + menuId.route.params.menuId;                
+            const fetchMenuResponse = await fetch(requestMenuUrl, httpHeader);
+            const requestBranchesUrl = baseUrl + '/api/Branch/Get';
+            const fetchBranchesResponse = await fetch(requestBranchesUrl, httpHeader);
+
+            const branchesJson = await fetchBranchesResponse.json(); 
+            var objectDropdownArray = [];
+            console.log("Total Branches: " + branchesJson.length);
+            for(var i = 0; i < branchesJson.length; i++) {
+                objectDropdownArray.push({ 
+                    key: branchesJson[i].ID,
+                    value:branchesJson[i].BranchName
+                });
+            }                        
+            setBranches(objectDropdownArray);
+            
+            // menu
+            const menuJson = await fetchMenuResponse.json(); 
+            console.log("getMenu success");
+            console.log(menuJson);
+            setSelectedMenu(menuJson); 
+            
+            setDataFetched(true);
+        };
+        fetchData();
+    });
 
     function renderItem(data) {
-        console.log(data);
-        console.log("renderItem");
+        //console.log(data);
+        //console.log("renderItem");
         
         return (
             <View style={{ paddingBottom: 15 }}>
@@ -77,10 +113,10 @@ export default function Order(menuId){
                     marginTop: 30,
                     marginBottom: 20,
                 }}
-                key={data.id}
+                key={data.Id}
             >
                 <Image
-                    source={data.presentationImage}
+                    source={{ uri: baseImageUrl + data.ImageUrl }}
                     style={{
                         height: 206,
                         width: "100%",
@@ -104,7 +140,7 @@ export default function Order(menuId){
                             color: COLORS.black,
                         }}
                     >
-                        {data.name}
+                        {data.Name}
                     </Text>
                     <View
                         style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}
@@ -138,7 +174,7 @@ export default function Order(menuId){
                         marginBottom: 10,
                     }}
                 >
-                    {data.compound}
+                    {data.Description.trim()}
                 </Text>
                 <View
                     style={{
@@ -193,7 +229,7 @@ export default function Order(menuId){
                             color: COLORS.carrot,
                         }}
                     >
-                        {data.price.toLocaleString("id-ID")}++
+                        {data.PriceChildren.toLocaleString("id-ID")}++
                     </Text>
                     
                     <Text
@@ -203,7 +239,7 @@ export default function Order(menuId){
                             color: COLORS.carrot,
                         }}
                     >
-                        {data.price.toLocaleString("id-ID")}++
+                        {data.Price.toLocaleString("id-ID")}++
                     </Text>
 
                     <Text
@@ -213,7 +249,7 @@ export default function Order(menuId){
                             color: COLORS.carrot,
                         }}
                     >
-                        {data.price.toLocaleString("id-ID")}++
+                        {data.PriceSenior.toLocaleString("id-ID")}++
                     </Text>
                 </View>
                 
@@ -225,9 +261,9 @@ export default function Order(menuId){
     }
 
     const getMenu = async () => {
-        console.log("getMenu called: " + menuId.menuId);
+        console.log("getMenu called: " + menuId.route.params.menuId);
         try {          
-          const requestUrl = baseUrl + '/api/Menu/GetMenu?id=' + menuId.menuId;
+          const requestUrl = baseUrl + '/api/Menu/GetMenu?id=' + menuId.route.params.menuId;
           console.log(requestUrl);
           const response = await fetch(requestUrl, 
             {   
@@ -475,7 +511,11 @@ export default function Order(menuId){
     }
 
     function renderSwipeListView() {
-        //console.log("dishes: " + dishes[0].name);
+        if(Object.keys(selectedMenu).length === 0 && selectedMenu.constructor === Object) {
+            return;
+        }
+
+        console.log(selectedMenu);
         return renderItem(selectedMenu);
             {/* <SwipeListView
                 data={dishes}
@@ -572,41 +612,7 @@ export default function Order(menuId){
                 </View>               
             </View>
         );
-    }
-
-    React.useEffect(() => {
-        const fetchData = async () => {
-            console.log("fetchData");
-            try{
-                const requestMenuUrl = baseUrl + '/api/Menu/GetMenu?id=' + menuId.menuId;                
-                const fetchMenuResponse = await fetch(requestMenuUrl, httpHeader);
-                const requestBranchesUrl = baseUrl + '/api/Branch/Get';
-                const fetchBranchesResponse = await fetch(requestBranchesUrl, httpHeader);
-
-                // branches
-                const branchesJson = await fetchBranchesResponse.json(); 
-                var objectDropdownArray = [];
-                console.log("Total Branches: " + branchesJson.length);
-                for(var i = 0; i < branchesJson.length; i++) {
-                    objectDropdownArray.push({ 
-                        key: branchesJson[i].ID,
-                        value:branchesJson[i].BranchName
-                    });
-                }                        
-                setBranches(objectDropdownArray);
-                
-                // menu
-                const menuJson = await fetchMenuResponse.json(); 
-                console.log("getMenu success");
-                console.log(menuJson);
-                setSelectedMenu(menuJson);
-            }
-            catch (error) {
-                console.log("Fetch Error: " + error);
-            }
-        };
-        fetchData();
-    }, []);
+    }    
 
     return (
         <SafeAreaView style={{ ...SAFEAREAVIEW.AndroidSafeArea, paddingTop: 10 }}>
