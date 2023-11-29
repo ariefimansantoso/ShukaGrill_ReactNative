@@ -208,11 +208,11 @@ export default function FoodDetails() {
                         marginBottom: 33,
                         backgroundColor: COLORS.red, }}
                     onPress={() => {
-                        navigation.navigate('MainLayout', {
-                            openTab: "Order",
-                            menuId: dish.Id,
-                        });
-                        //navigation.navigate("Order");
+                        // navigation.navigate('MainLayout', {
+                        //     openTab: "Order",
+                        //     menuId: dish.Id,
+                        // });
+                        navigation.navigate("Order", { menuId: dish.Id });
                     }}
                 />
             </View>

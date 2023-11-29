@@ -33,12 +33,12 @@ const tabs = [
         name: "Menu",
         icon: require("../assets/icons/home.png"),
     },
-    {
+   /*  {
         id: "2",
         screen: "Cart",
         name: "Keranjang",
         icon: require("../assets/icons/shopping-cart.png"),
-    },
+    }, */
     {
         id: "3",
         screen: "OrderHistory",

@@ -27,7 +27,7 @@ export default function MainLayout({ route }) {
         <View style={{ flex: 1 }}>
             
             {selectedTab == "Order" && <Order menuId={route.params.menuId} />}
-            {selectedTab == "Cart" && <CartIsEmpty />}
+            {/* {selectedTab == "Cart" && <CartIsEmpty />} */}
             {selectedTab == "FoodDetails" && <FoodDetails />}
             {selectedTab == "OrderHistory" && <OrderHistory />}
             {selectedTab == "Contact" && <Contact />}
