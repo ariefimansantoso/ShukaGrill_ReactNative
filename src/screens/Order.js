@@ -26,6 +26,7 @@ import {
     Plus,
     InputField,
     BasketTwo,
+    Star
 } from "../components";
 import { COLORS, SAFEAREAVIEW, FONTS, SIZES, baseUrl, baseImageUrl } from "../constants";
 
@@ -54,67 +55,106 @@ export default function Order(menuId){
     const [selectedBranch, setSelectedBranch] = React.useState("");
     const [selectedMenu, setSelectedMenu] = useState({});    
     const [dataFetched, setDataFetched] = useState(false);
+    const [cart, setCart] = useState({});
 
     const httpHeader = {   
         method: "GET",       
         headers: {  "Content-type": "application/json" }
     };
 
-    if(menuId) {
+    /* if(menuId) {
         console.log("menuId: " + menuId.route.params.menuId);
         console.log(menuId.route.params.menuId);        
-    }    
+    }    */ 
 
     useEffect(() => {
         if(dataFetched == true){
             return;
         }
 
-        const fetchData = async() => {
+        const fetchData = () => {
             console.log("useEffect");
             // branches
             const requestMenuUrl = baseUrl + '/api/Menu/GetMenu?id=' + menuId.route.params.menuId;                
-            const fetchMenuResponse = await fetch(requestMenuUrl, httpHeader);
-            const requestBranchesUrl = baseUrl + '/api/Branch/Get';
-            const fetchBranchesResponse = await fetch(requestBranchesUrl, httpHeader);
+            const fetchMenuResponse = fetch(requestMenuUrl, httpHeader).then(r => r.json());
+            fetchMenuResponse.then(res => {
+                const requestBranchesUrl = baseUrl + '/api/Branch/Get';
+                return fetch(requestBranchesUrl, httpHeader)
+                .then(resp => resp.json())
+                .then(trans => {
+                
+                    //console.log(res);
+                    // menu
+                    const menuJson = res; 
+                    //console.log("getMenu success");
+                    //console.log(menuJson);
+                    setSelectedMenu(menuJson);  
 
-            const branchesJson = await fetchBranchesResponse.json(); 
-            var objectDropdownArray = [];
-            console.log("Total Branches: " + branchesJson.length);
-            for(var i = 0; i < branchesJson.length; i++) {
-                objectDropdownArray.push({ 
-                    key: branchesJson[i].ID,
-                    value:branchesJson[i].BranchName
+                    //console.log(trans); 
+                    const branchesJson = trans;
+                    var objectDropdownArray = [];
+                    var selectedBranchId = branchesJson[0].ID;
+                    //console.log("Total Branches: " + branchesJson.length);
+                    for(var i = 0; i < branchesJson.length; i++) {
+                        objectDropdownArray.push({ 
+                            key: branchesJson[i].ID,
+                            value:branchesJson[i].BranchName
+                        });
+                    }                        
+                    setBranches(objectDropdownArray);
+
+                    const raw = JSON.stringify({
+                        "MenuID": menuId.route.params.menuId,
+                        "BranchID": selectedBranchId,
+                        "Pax": 1,
+                        "PaxChildren": 0,
+                        "PaxSenior": 0
+                      });
+                    var urlencoded = new URLSearchParams();
+                    urlencoded.append("MenuID", menuId.route.params.menuId);
+                    urlencoded.append("BranchID", selectedBranchId);
+                    urlencoded.append("Pax", 1);
+                    urlencoded.append("PaxChildren", 0);
+                    urlencoded.append("PaxSenior", 0);
+                    const requestOptions = {   
+                        method: "GET",       
+                        headers: {  "Content-type": "application/x-www-form-urlencoded" },
+                        body: urlencoded,
+                        redirect: 'follow'
+                    };
+                    //console.log(raw);
+                    const requestOrderUrl = baseUrl + '/api/Order/Get';
+                    //var url = new URL(requestOrderUrl);                    
+                    //Object.keys(raw).forEach(key => url.searchParams.append(key, raw[key]))
+                    return fetch(requestOrderUrl, requestOptions).then(respx => respx.json())
+                    .then(transx => {
+                        //const orderJson = trans.json();
+                        console.log(transx); 
+                        setDataFetched(true);
+                    });                            
                 });
-            }                        
-            setBranches(objectDropdownArray);
-            
-            // menu
-            const menuJson = await fetchMenuResponse.json(); 
-            console.log("getMenu success");
-            console.log(menuJson);
-            setSelectedMenu(menuJson); 
-            
-            setDataFetched(true);
+            });               
         };
         fetchData();
-    });
+    }, []);
 
     function renderItem(data) {
         //console.log(data);
         //console.log("renderItem");
         
         return (
-            <View style={{ paddingBottom: 15 }}>
+            
                 
-                <View
+            <View
                 style={{
                     marginHorizontal: 30,
                     marginTop: 30,
                     marginBottom: 20,
+                    flex: 1
                 }}
                 key={data.Id}
             >
+           
                 <Image
                     source={{ uri: baseImageUrl + data.ImageUrl }}
                     style={{
@@ -145,15 +185,15 @@ export default function Order(menuId){
                     <View
                         style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}
                     >
-                        {/*<Text
+                        <Text
                             style={{ ...FONTS.Roboto_500Medium, fontSize: 16 }}
                         >
-                            {dish.Rating}
+                            {data.Rating}
                         </Text>
                         <View style={{ marginHorizontal: 6 }}>
                             <Star />
                         </View>
-                         <Text
+                         {/* <Text
                             style={{
                                 ...FONTS.Roboto_500Medium,
                                 fontSize: 16,
@@ -161,7 +201,7 @@ export default function Order(menuId){
                             }}
                         >
                             120 Review
-                        </Text> */}
+                        </Text>  */}
                     </View>
                 </View>
                 <Text
@@ -180,83 +220,113 @@ export default function Order(menuId){
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
-                        justifyContent: "space-between",
-                        marginBottom: 5,
+                        justifyContent: "space-between"
                     }}
-                >
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_500Bold,
-                            fontSize: 14,
-                            color: COLORS.black,
-                        }}
-                    >
-                        Anak 6-12:
-                    </Text>
-                    
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_500Bold,
-                            fontSize: 14,
-                            color: COLORS.black,
-                        }}
-                    >
-                        Dewasa:   
-                    </Text>
-
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_500Bold,
-                            fontSize: 14,
-                            color: COLORS.black,
-                        }}
-                    >
-                        Senior 60:
-                    </Text>
+                >                                        
+                    <View style={{ flexDirection: "row", flex: 1, alignItems: "center", marginBottom: 8 }}>
+                        <View style={{flex: 1}}>
+                            <Text
+                                style={{
+                                    ...FONTS.Roboto_500Bold,
+                                    fontSize: 14,
+                                    color: COLORS.black,
+                                }}
+                            >
+                                Anak 6-12:
+                            </Text>
+                        </View>
+                        <View style={{flex: 1}}>
+                            <Text
+                                style={{
+                                    ...FONTS.Roboto_700Bold,
+                                    fontSize: 16,
+                                    color: COLORS.red,
+                                    marginRight:10,
+                                    textAlign: 'right'
+                                }}
+                            >
+                                {parseInt(data.PriceChildren).toLocaleString('id-ID')}++
+                            </Text>
+                        </View>
+                    </View>
+                    <NumericInput minValue={0} onChange={value => console.log(value)} />
                 </View>
                 <View
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        marginBottom: 25,
+                        marginTop:30
                     }}
-                >
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_700Bold,
-                            fontSize: 20,
-                            color: COLORS.carrot,
-                        }}
-                    >
-                        {data.PriceChildren.toLocaleString("id-ID")}++
-                    </Text>
-                    
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_700Bold,
-                            fontSize: 20,
-                            color: COLORS.carrot,
-                        }}
-                    >
-                        {data.Price.toLocaleString("id-ID")}++
-                    </Text>
-
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_700Bold,
-                            fontSize: 20,
-                            color: COLORS.carrot,
-                        }}
-                    >
-                        {data.PriceSenior.toLocaleString("id-ID")}++
-                    </Text>
+                >                                        
+                    <View style={{ flexDirection: "row", flex: 1, alignItems: "center", marginBottom: 8 }}>
+                        <View style={{flex: 1}}>
+                            <Text
+                                style={{
+                                    ...FONTS.Roboto_500Bold,
+                                    fontSize: 14,
+                                    color: COLORS.black,
+                                }}
+                            >
+                                Dewasa:
+                            </Text>
+                        </View>
+                        <View style={{flex: 1}}>
+                            <Text
+                                style={{
+                                    ...FONTS.Roboto_700Bold,
+                                    fontSize: 16,
+                                    color: COLORS.red,
+                                    marginRight:10,
+                                    textAlign: 'right'
+                                }}
+                            >
+                                {data.Price.toLocaleString("id-ID")}++
+                            </Text>
+                        </View>
+                    </View>
+                    <NumericInput minValue={0} initValue={1} onChange={value => console.log(value)} />
                 </View>
-                
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginTop:30
+                    }}
+                >                                        
+                    <View style={{ flexDirection: "row", flex: 1, alignItems: "center", marginBottom: 8 }}>
+                        <View style={{flex: 1}}>
+                            <Text
+                                style={{
+                                    ...FONTS.Roboto_500Bold,
+                                    fontSize: 14,
+                                    color: COLORS.black,
+                                }}
+                            >
+                                Senior 60:
+                            </Text>
+                        </View>
+                        <View style={{flex: 1}}>
+                            <Text
+                                style={{
+                                    ...FONTS.Roboto_700Bold,
+                                    fontSize: 16,
+                                    color: COLORS.red,
+                                    marginRight:10,
+                                    textAlign: 'right'
+                                }}
+                            >
+                                {data.PriceSenior.toLocaleString("id-ID")}++
+                            </Text>
+                        </View>
+                    </View>
+                    <NumericInput minValue={0} initValue={0} onChange={value => console.log(value)} />
+                </View>  
+                        
             </View>
-                    
+            
                
-            </View>
         );
     }
 
@@ -313,44 +383,7 @@ export default function Order(menuId){
 
     function renderFooterComponent() {
         return (
-            <View style={{paddingHorizontal: 30}}>
-                <View style={{ marginTop: 15 }}>
-                    <DashedLine
-                        dashLength={10}
-                        dashThickness={1}
-                        dashGap={5}
-                        dashColor={COLORS.gray2}
-                        dashStyle={{ borderRadius: 5 }}
-                    />
-                </View>
-
-              {/*   <View
-                    style={{
-                        height: 50,
-                        width: "100%",
-                        borderWidth: 1,
-                        borderRadius: 10,
-                        marginVertical: 18,
-                        borderColor: "#D7D7D7",
-                        justifyContent: "center",
-                        paddingHorizontal: 15,
-                    }}
-                >
-                    <TextInput
-                        placeholder="Enter your promo code"
-                        placeholderTextColor={COLORS.black}
-                        style={{ flex: 1 }}
-                    />
-                </View> */}
-                <View style={{ marginBottom: 27 }}>
-                    <DashedLine
-                        dashLength={10}
-                        dashThickness={1}
-                        dashGap={5}
-                        dashColor={COLORS.gray2}
-                        dashStyle={{ borderRadius: 5 }}
-                    />
-                </View>
+            <View style={{paddingHorizontal: 30}}>                                
                 <View
                     style={{
                         flexDirection: "row",
@@ -515,7 +548,7 @@ export default function Order(menuId){
             return;
         }
 
-        console.log(selectedMenu);
+        //console.log(selectedMenu);
         return renderItem(selectedMenu);
             {/* <SwipeListView
                 data={dishes}
@@ -616,12 +649,12 @@ export default function Order(menuId){
 
     return (
         <SafeAreaView style={{ ...SAFEAREAVIEW.AndroidSafeArea, paddingTop: 10 }}>
-            <Header title="Order" onPress={() => navigation.goBack()} style={{ marginTop: 20 }} />            
-            <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+            <Header title="Order" onPress={() => navigation.navigate("MainLayout")} style={{ marginTop: 20 }} />            
+            <ScrollView style={{ flex: 1 }} behavior="padding">
                 {renderSwipeListView()}
                 {renderBranches()}
                 {renderFooterComponent()}
-            </KeyboardAvoidingView>
+            </ScrollView>
         </SafeAreaView>
     );
 }
