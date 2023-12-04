@@ -8,7 +8,7 @@ import {
     TextInput,
     KeyboardAvoidingView,
 } from "react-native";
-import React, { useEffect, useState }  from "react";
+import React, { useEffect, useState, useRef }  from "react";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { useNavigation } from "@react-navigation/native";
 import { Rating, AirbnbRating } from "react-native-ratings";
@@ -55,25 +55,54 @@ export default function Order(menuId){
     const [selectedBranch, setSelectedBranch] = React.useState("");
     const [selectedMenu, setSelectedMenu] = useState({});    
     const [dataFetched, setDataFetched] = useState(false);
-    const [cart, setCart] = useState({});
+    const [cart, setCart] = useState(undefined);
+
+    const [pax, setPax] = useState(0);
+    const [paxChildren, setPaxChildren] = useState(0);
+    const [paxSenior, setPaxSenior] = useState(0);
+    const [price, setPrice] = useState(0);
+    const [priceChildren, setPriceChildren] = useState(0);
+    const [priceSenior, setPriceSenior] = useState(0);
+
+    const [subTotal, setSubTotal] = useState(0);
+    const [discount, setDiscount] = useState(0);
+    const [subtotalAfterDiscount, setSubtotalAfterDiscount] = useState(0);
+    const [pb1, setPb1] = useState(0);
+    const [serviceCharge, setServiceCharge] = useState(0);
+    const [grandTotal, setGrandTotal] = useState(0);
+
+    const [discountType, setDiscountType] = useState("");
 
     const httpHeader = {   
         method: "GET",       
         headers: {  "Content-type": "application/json" }
     };
 
-    /* if(menuId) {
-        console.log("menuId: " + menuId.route.params.menuId);
-        console.log(menuId.route.params.menuId);        
-    }    */ 
+    function recalculate() {
+        console.log("Calculate");
+        let subTotalTemp = (pax * price) + (paxChildren * priceChildren) + (paxSenior * priceSenior);
+        console.log("subTotalTemp: " + subTotalTemp);
+        setSubTotal(subTotalTemp);
+        let diskonTemp = 0.1 * subTotalTemp;
+        setDiscount(diskonTemp);
+        let subtotalAfterDiscountTemp = subTotalTemp - diskonTemp;
+        setSubtotalAfterDiscount(subtotalAfterDiscountTemp);
+        let pb1Temp = 0.1 * subtotalAfterDiscountTemp;
+        setPb1(pb1Temp);
+        let subTotalPlusPb1 = subtotalAfterDiscountTemp + pb1Temp;
+        let serviceChargeTemp = Math.ceil(0.05 * subTotalPlusPb1);
+        setServiceCharge(serviceChargeTemp);
+        let grandTotalTemp = Math.ceil(subTotalPlusPb1 + serviceChargeTemp);
+        setGrandTotal(grandTotalTemp);
+    }
 
     useEffect(() => {
-        if(dataFetched == true){
+        console.log("A useEffect");
+        if(dataFetched == true){            
             return;
         }
 
-        const fetchData = () => {
-            console.log("useEffect");
+        const fetchData = () => {            
             // branches
             const requestMenuUrl = baseUrl + '/api/Menu/GetMenu?id=' + menuId.route.params.menuId;                
             const fetchMenuResponse = fetch(requestMenuUrl, httpHeader).then(r => r.json());
@@ -116,10 +145,11 @@ export default function Order(menuId){
                     urlencoded.append("Pax", 1);
                     urlencoded.append("PaxChildren", 0);
                     urlencoded.append("PaxSenior", 0);
+                    //console.log(raw);
                     const requestOptions = {   
-                        method: "GET",       
-                        headers: {  "Content-type": "application/x-www-form-urlencoded" },
-                        body: urlencoded,
+                        method: "POST",       
+                        headers: {  "Content-type": "application/json" },
+                        body: raw,
                         redirect: 'follow'
                     };
                     //console.log(raw);
@@ -129,22 +159,40 @@ export default function Order(menuId){
                     return fetch(requestOrderUrl, requestOptions).then(respx => respx.json())
                     .then(transx => {
                         //const orderJson = trans.json();
-                        console.log(transx); 
+                        console.log("here");
+                        //console.log(transx);
+                        
+                        setPax(transx.Pax);
+                        setPaxChildren(transx.PaxChildren);
+                        setPaxSenior(transx.PaxSenior);
+                        setPrice(menuJson.Price);
+                        setPriceChildren(menuJson.PriceChildren);
+                        setPriceSenior(menuJson.PriceSenior);
+
+                        setSubTotal(transx.TotalPriceBeforeDiscount);
+                        setDiscount(transx.Diskon);
+                        setSubtotalAfterDiscount(transx.TotalAfterDiskon);
+                        setPb1(transx.PB1);
+                        setServiceCharge(Math.ceil(transx.ServiceCharge));
+                        setGrandTotal(Math.ceil(transx.GrandTotal));
+                        setDiscountType(transx.DiscountType);
+                        
+                        setCart(transx);
+                        
                         setDataFetched(true);
                     });                            
                 });
             });               
         };
         fetchData();
-    }, []);
+    }, [cart, selectedMenu, dataFetched]);
 
-    function renderItem(data) {
-        //console.log(data);
-        //console.log("renderItem");
-        
-        return (
-            
-                
+    useEffect(() => {        
+        recalculate();
+    }, [pax, paxChildren, paxSenior, price, priceChildren, priceSenior, subTotal, discount, subtotalAfterDiscount, pb1, serviceCharge, grandTotal]);
+
+    function renderItem(data) {        
+        return (            
             <View
                 style={{
                     marginHorizontal: 30,
@@ -249,7 +297,7 @@ export default function Order(menuId){
                             </Text>
                         </View>
                     </View>
-                    <NumericInput minValue={0} onChange={value => console.log(value)} />
+                    <NumericInput minValue={0} onChange={value => {setPaxChildren(value);}} />
                 </View>
                 <View
                     style={{
@@ -285,7 +333,7 @@ export default function Order(menuId){
                             </Text>
                         </View>
                     </View>
-                    <NumericInput minValue={0} initValue={1} onChange={value => console.log(value)} />
+                    <NumericInput minValue={0} initValue={1} onChange={value => {setPax(value);}} />
                 </View>
                 <View
                     style={{
@@ -321,7 +369,7 @@ export default function Order(menuId){
                             </Text>
                         </View>
                     </View>
-                    <NumericInput minValue={0} initValue={0} onChange={value => console.log(value)} />
+                    <NumericInput minValue={0} onChange={value => {setPaxSenior(value);}} />
                 </View>  
                         
             </View>
@@ -382,6 +430,12 @@ export default function Order(menuId){
       };
 
     function renderFooterComponent() {
+        if(!cart) {
+            console.log("cart null");
+            return;
+        }
+        console.log("cart oke");
+        //console.log(cart);        
         return (
             <View style={{paddingHorizontal: 30}}>                                
                 <View
@@ -403,7 +457,7 @@ export default function Order(menuId){
                         }}
                     >
                         {" "}
-                        $200.00
+                        {subTotal.toLocaleString("id-ID")}
                     </Text>
                 </View>
                 <View
@@ -415,7 +469,7 @@ export default function Order(menuId){
                     }}
                 >
                     <Text style={{ ...FONTS.Roboto_700Bold, fontSize: 14 }}>
-                        Diskon 10%:
+                        {discountType}:
                     </Text>
                     <Text
                         style={{
@@ -425,7 +479,7 @@ export default function Order(menuId){
                         }}
                     >
                         {" "}
-                        $200.00
+                        {discount.toLocaleString("id-ID")}
                     </Text>
                 </View>
                 <View
@@ -447,7 +501,7 @@ export default function Order(menuId){
                         }}
                     >
                         {" "}
-                        $200.00
+                        {subtotalAfterDiscount.toLocaleString("id-ID")}
                     </Text>
                 </View>
                 <View
@@ -469,7 +523,7 @@ export default function Order(menuId){
                         }}
                     >
                         {" "}
-                        $200.00
+                        {pb1.toLocaleString("id-ID")}
                     </Text>
                 </View>
                 <View
@@ -491,7 +545,7 @@ export default function Order(menuId){
                         }}
                     >
                         {" "}
-                        $200.00
+                        {serviceCharge.toLocaleString("id-ID")}
                     </Text>
                 </View>
                 <View
@@ -513,7 +567,8 @@ export default function Order(menuId){
                         }}
                     >
                         {" "}
-                        $200.00
+                        
+                        {grandTotal.toLocaleString("id-ID")}
                     </Text>
                 </View>
                 <Button
