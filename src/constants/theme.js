@@ -13,7 +13,7 @@ export const COLORS = {
   lightYellow: 'rgba(255,199,0, 0.1)',
   lightRed: 'rgba(254,33,33, 0.1)',
   transparent: 'rgba(0,0,0, 0)',
-  lightGray: '#F6F6F6',
+  lightGray: '#F8F8F8',
   lightLilac: '#F4F1FC',
   carrot: '#FE724E',
   darkBlue: '#1F1D2B',
@@ -23,6 +23,7 @@ export const COLORS = {
   onboardingRedText: '#c2272e',
   normalGray: '#6c6c6c',
   darkGray: '#1f1f1f',
+  lightBlue: '#2196f3',
 
   shadowStartColor: 'rgb(196,196,196, 0.07)',
   shadowFinalColor: 'rgb(255, 255, 255, 0.08)',

@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     TextInput,
     KeyboardAvoidingView,
+    StyleSheet
 } from "react-native";
 import React, { useEffect, useState, useRef }  from "react";
 import { SwipeListView } from "react-native-swipe-list-view";
@@ -17,6 +18,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Shadow } from "react-native-shadow-2";
 import NumericInput from 'react-native-numeric-input'
 import { SelectList } from 'react-native-dropdown-select-list';
+import { Dropdown } from 'react-native-element-dropdown';
+import DatePicker from 'react-native-date-picker'
 
 import {
     Header,
@@ -52,7 +55,8 @@ const dishes = [
 export default function Order(menuId){
     const navigation = useNavigation();
     const [branches, setBranches] = useState([]);
-    const [selectedBranch, setSelectedBranch] = React.useState("");
+    const [selectedBranch, setSelectedBranch] = React.useState(0);
+    const [selectedBranchName, setSelectedBranchName] = React.useState("");
     const [selectedMenu, setSelectedMenu] = useState({});    
     const [dataFetched, setDataFetched] = useState(false);
     const [cart, setCart] = useState(undefined);
@@ -73,10 +77,57 @@ export default function Order(menuId){
 
     const [discountType, setDiscountType] = useState("");
 
+    // dropdown
+    const [isFocus, setIsFocus] = useState(false);
+
+    // datepicker
+    const [selectedDate, setSelectedDate] = useState(undefined)
+    const [open, setOpen] = useState(false)
+
     const httpHeader = {   
         method: "GET",       
         headers: {  "Content-type": "application/json" }
     };
+
+    const dropdownStyles = StyleSheet.create({
+        container: {
+          backgroundColor: 'white',
+          padding: 16,
+        },
+        dropdown: {
+          height: 50,
+          borderColor: 'gray',
+          borderWidth: 0.5,
+          borderRadius: 8,
+          paddingHorizontal: 8,
+        },
+        icon: {
+          marginRight: 5,
+        },
+        label: {
+          position: 'absolute',
+          backgroundColor: 'white',
+          left: 22,
+          top: 8,
+          zIndex: 999,
+          paddingHorizontal: 8,
+          fontSize: 14,
+        },
+        placeholderStyle: {
+          fontSize: 16,
+        },
+        selectedTextStyle: {
+          fontSize: 16,
+        },
+        iconStyle: {
+          width: 20,
+          height: 20,
+        },
+        inputSearchStyle: {
+          height: 40,
+          fontSize: 16,
+        },
+      });
 
     function recalculate() {
         console.log("Calculate");
@@ -126,8 +177,8 @@ export default function Order(menuId){
                     //console.log("Total Branches: " + branchesJson.length);
                     for(var i = 0; i < branchesJson.length; i++) {
                         objectDropdownArray.push({ 
-                            key: branchesJson[i].ID,
-                            value:branchesJson[i].BranchName
+                            label: branchesJson[i].BranchName,
+                            value: branchesJson[i].ID
                         });
                     }                        
                     setBranches(objectDropdownArray);
@@ -173,8 +224,8 @@ export default function Order(menuId){
                         setDiscount(transx.Diskon);
                         setSubtotalAfterDiscount(transx.TotalAfterDiskon);
                         setPb1(transx.PB1);
-                        setServiceCharge(Math.ceil(transx.ServiceCharge));
-                        setGrandTotal(Math.ceil(transx.GrandTotal));
+                        setServiceCharge(Math.round(transx.ServiceCharge));
+                        setGrandTotal(Math.round(transx.GrandTotal));
                         setDiscountType(transx.DiscountType);
                         
                         setCart(transx);
@@ -185,11 +236,20 @@ export default function Order(menuId){
             });               
         };
         fetchData();
-    }, [cart, selectedMenu, dataFetched]);
+    }, []);
 
     useEffect(() => {        
         recalculate();
     }, [pax, paxChildren, paxSenior, price, priceChildren, priceSenior, subTotal, discount, subtotalAfterDiscount, pb1, serviceCharge, grandTotal]);
+
+    useEffect(() => {
+        console.log("selected Branch: " + selectedBranch);
+        console.log("selected Branch Name: " + selectedBranchName);
+    }, [selectedBranch, selectedBranchName]);
+
+    useEffect(() => {
+        console.log("selected Date: " + selectedDate);
+    }, [selectedDate]);
 
     function renderItem(data) {        
         return (            
@@ -437,145 +497,219 @@ export default function Order(menuId){
         console.log("cart oke");
         //console.log(cart);        
         return (
-            <View style={{paddingHorizontal: 30}}>                                
+            <View style={{paddingHorizontal: 30}}>                                            
                 <View
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "flex-end",
-                        marginBottom: 10,
+                        marginBottom: 5,
                     }}
                 >
-                    <Text style={{ ...FONTS.Roboto_700Bold, fontSize: 14 }}>
-                        Sub Total:
-                    </Text>
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_700Bold,
-                            fontSize: 14,
-                            color: COLORS.red,
-                        }}
-                    >
-                        {" "}
-                        {subTotal.toLocaleString("id-ID")}
-                    </Text>
+                    <Text style={{ ...FONTS.Roboto_700Bold, fontSize: 14, 
+                                marginRight:10,
+                                textAlign: 'right' }}>
+                            Sub Total
+                        </Text>
+                    <View style={{flex: 1}}>
+                        <Text
+                            style={{
+                                ...FONTS.Roboto_700Bold,
+                                fontSize: 14,
+                                color: COLORS.red,
+                                marginRight:10,
+                                textAlign: 'right'
+                            }}
+                        >
+                            {" "}
+                            {subTotal.toLocaleString("id-ID")}
+                        </Text>
+                    </View>
                 </View>
+                <View style={{ marginBottom: 5 }}>
+                    <DashedLine
+                        dashLength={10}
+                        dashThickness={1}
+                        dashGap={0}
+                        dashColor={COLORS.lightGray}
+                        dashStyle={{ borderRadius: 5 }}
+                    />
+                </View>   
                 <View
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "flex-end",
-                        marginBottom: 10,
+                        marginBottom: 5,
                     }}
                 >
-                    <Text style={{ ...FONTS.Roboto_700Bold, fontSize: 14 }}>
-                        {discountType}:
+                    <Text style={{ ...FONTS.Roboto_700Bold, fontSize: 14, 
+                                marginRight:10,
+                                textAlign: 'right' }}>
+                        {discountType}
                     </Text>
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_700Bold,
-                            fontSize: 14,
-                            color: COLORS.red,
-                        }}
-                    >
+                    <View style={{flex: 1}}>
+                        <Text
+                            style={{
+                                ...FONTS.Roboto_700Bold,
+                                fontSize: 14,
+                                color: COLORS.red,
+                                marginRight:10,
+                                textAlign: 'right'
+                            }}
+                        >
                         {" "}
                         {discount.toLocaleString("id-ID")}
-                    </Text>
+                        </Text>
+                    </View>
                 </View>
+                <View style={{ marginBottom: 5 }}>
+                    <DashedLine
+                        dashLength={10}
+                        dashThickness={1}
+                        dashGap={0}
+                        dashColor={COLORS.lightGray}
+                        dashStyle={{ borderRadius: 5 }}
+                    />
+                </View> 
                 <View
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "flex-end",
-                        marginBottom: 10,
+                        marginBottom: 5,
                     }}
                 >
                     <Text style={{ ...FONTS.Roboto_700Bold, fontSize: 14 }}>
-                        Sub Total Setelah Diskon:
+                        Sub Total Setelah Diskon
                     </Text>
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_700Bold,
-                            fontSize: 14,
-                            color: COLORS.red,
-                        }}
-                    >
-                        {" "}
-                        {subtotalAfterDiscount.toLocaleString("id-ID")}
-                    </Text>
+                    <View style={{flex: 1}}>
+                        <Text
+                            style={{
+                                ...FONTS.Roboto_700Bold,
+                                fontSize: 14,
+                                color: COLORS.red,
+                                marginRight:10,
+                                textAlign: 'right'
+                            }}
+                        >                    
+                            {" "}
+                            {subtotalAfterDiscount.toLocaleString("id-ID")}
+                        </Text>
+                    </View>
                 </View>
+                <View style={{ marginBottom: 5 }}>
+                    <DashedLine
+                        dashLength={10}
+                        dashThickness={1}
+                        dashGap={0}
+                        dashColor={COLORS.lightGray}
+                        dashStyle={{ borderRadius: 5 }}
+                    />
+                </View> 
                 <View
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "flex-end",
-                        marginBottom: 10,
+                        marginBottom: 5,
                     }}
                 >
                     <Text style={{ ...FONTS.Roboto_700Bold, fontSize: 14 }}>
-                        Pajak PB1 10%:
+                        Pajak PB1 10%
                     </Text>
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_700Bold,
-                            fontSize: 14,
-                            color: COLORS.red,
-                        }}
-                    >
+                    <View style={{flex: 1}}>
+                        <Text
+                            style={{
+                                ...FONTS.Roboto_700Bold,
+                                fontSize: 14,
+                                color: COLORS.red,
+                                marginRight:10,
+                                textAlign: 'right'
+                            }}
+                        >
                         {" "}
                         {pb1.toLocaleString("id-ID")}
                     </Text>
+                    </View>
                 </View>
+                <View style={{ marginBottom: 5 }}>
+                    <DashedLine
+                        dashLength={10}
+                        dashThickness={1}
+                        dashGap={0}
+                        dashColor={COLORS.lightGray}
+                        dashStyle={{ borderRadius: 5 }}
+                    />
+                </View> 
                 <View
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "flex-end",
-                        marginBottom: 10,
+                        marginBottom: 5,
                     }}
                 >
                     <Text style={{ ...FONTS.Roboto_700Bold, fontSize: 14 }}>
-                        Service Charge:
+                        Service Charge
                     </Text>
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_700Bold,
-                            fontSize: 14,
-                            color: COLORS.red,
-                        }}
-                    >
+                    <View style={{flex: 1}}>
+                        <Text
+                            style={{
+                                ...FONTS.Roboto_700Bold,
+                                fontSize: 14,
+                                color: COLORS.red,
+                                marginRight:10,
+                                textAlign: 'right'
+                            }}
+                        >
                         {" "}
                         {serviceCharge.toLocaleString("id-ID")}
                     </Text>
+                    </View>
                 </View>
+                <View style={{ marginBottom: 5 }}>
+                    <DashedLine
+                        dashLength={10}
+                        dashThickness={1}
+                        dashGap={0}
+                        dashColor={COLORS.lightGray}
+                        dashStyle={{ borderRadius: 5 }}
+                    />
+                </View> 
                 <View
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "flex-end",
-                        marginBottom: 10,
+                        marginBottom: 5,
                     }}
                 >
-                    <Text style={{ ...FONTS.Roboto_700Bold, fontSize: 14 }}>
-                        Grand Total:
+                    <Text style={{ ...FONTS.Roboto_700Bold, fontSize: 20, color: COLORS.black }}>
+                        Grand Total
                     </Text>
-                    <Text
-                        style={{
-                            ...FONTS.Roboto_700Bold,
-                            fontSize: 14,
-                            color: COLORS.red,
-                        }}
-                    >
+                    <View style={{flex: 1}}>
+                        <Text
+                            style={{
+                                ...FONTS.Roboto_700Bold,
+                                fontSize: 20,
+                                color: COLORS.red,
+                                marginRight:10,
+                                textAlign: 'right'
+                            }}
+                        >
                         {" "}
                         
                         {grandTotal.toLocaleString("id-ID")}
                     </Text>
+                    </View>
                 </View>
                 <Button
                     title="Process to Checkout"
                     onPress={() => navigation.navigate("PaymentMethodOne")}
                     containerStyle={{ 
                         marginBottom: 33,
+                        marginTop: 30,
                         backgroundColor: COLORS.red, }}
                 />
             </View>
@@ -625,6 +759,14 @@ export default function Order(menuId){
     }
 
     function renderBranches() {
+        let strSelectedBranch = "";
+        if(selectedBranchName == "") {
+            strSelectedBranch = "Belum dipilih";
+        }
+        else {
+            strSelectedBranch = selectedBranchName;
+        }
+
         return (
             <View style={{paddingHorizontal: 30}}>
                 <View style={{ marginTop: 15 }}>
@@ -653,12 +795,12 @@ export default function Order(menuId){
                             color: COLORS.black,
                         }}
                     >
-                        Pilih cabang Shuka Gril yang akan dikunjungi:
+                        Pilih cabang Shuka Grill yang akan dikunjungi:
                     </Text>                    
                 </View>
                 <View
                     style={{
-                        height: 50,
+                        height: 110,
                         width: "100%",
                         borderWidth: 0,
                         borderRadius: 10,
@@ -668,28 +810,54 @@ export default function Order(menuId){
                         justifyContent: "left",
                         paddingHorizontal: 0,
                     }}
-                >
-                    <SelectList 
-                        setSelected={(val) => setSelectedBranch(val)} 
-                        data={branches} 
-                        style={{ flex: 1 }}
-                        boxStyles={{
-                            width: "100%",
-                            borderWidth: 1,
-                            borderRadius: 10,
-                            marginBottom: 18,
-                            marginTop: 0,
-                            borderColor: "#D7D7D7",
-                            paddingHorizontal: 15,
-                            marginHorizontal: 0
+                >                   
+                    <Dropdown
+                        style={[dropdownStyles.dropdown, isFocus && { borderColor: 'blue' }]}
+                        placeholderStyle={dropdownStyles.placeholderStyle}
+                        selectedTextStyle={dropdownStyles.selectedTextStyle}
+                        inputSearchStyle={dropdownStyles.inputSearchStyle}
+                        iconStyle={dropdownStyles.iconStyle}
+                        data={branches}
+                        search
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={!isFocus ? 'Select item' : '...'}
+                        searchPlaceholder="Search..."
+                        value={selectedBranch}
+                        onFocus={() => setIsFocus(true)}
+                        onBlur={() => setIsFocus(false)}
+                        onChange={item => {                            
+                            setSelectedBranch(item.value);
+                            setSelectedBranchName(item.label);
+                            setIsFocus(false);
                         }}
-                        dropdownStyles={{
-                            backgroundColor: "#ffffff"
-                        }}
-                        save="value"
                     />
+
+                    <Text
+                        style={{
+                            marginBottom: 0,
+                            marginTop:18,
+                            ...FONTS.Roboto_500Medium,
+                            fontSize: 14,
+                            color: COLORS.black,
+                        }}
+                    >
+                        Cabang yang dipilih:
+                    </Text>  
+                    <Text
+                        style={{
+                            marginBottom: 0,
+                            marginTop:0,
+                            ...FONTS.Roboto_500Medium,
+                            fontSize: 20,
+                            color: COLORS.red,
+                        }}
+                    >                        
+                        {strSelectedBranch}
+                    </Text>  
                 </View>
-                <View style={{ marginBottom: 27 }}>
+                <View style={{ marginBottom: 0 }}>
                     <DashedLine
                         dashLength={10}
                         dashThickness={1}
@@ -702,12 +870,153 @@ export default function Order(menuId){
         );
     }    
 
+    function renderDatePicker() {
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth();
+        let currentDay = currentDate.getDate();
+
+        let strHour = "";
+        let hour = 0;
+        let strMinutes = "";
+        let minutes = 0;
+        let strTime = "";
+
+        if(selectedDate != undefined) {
+            strHour = "";
+            hour = selectedDate.getHours();
+            
+            if(hour == 0)
+            {
+                strHour = "00";
+            }
+
+            if(hour < 10) {
+                strHour = "0" + hour;
+            }
+
+            if(hour > 10) {
+                strHour = hour;
+            }
+
+            strMinutes = "";
+            minutes = selectedDate.getMinutes();
+            
+            if(minutes == 0)
+            {
+                strMinutes = "00";
+            }
+
+            if(minutes < 10) {
+                strMinutes = "0" + minutes;
+            }
+
+            if(minutes > 10) {
+                strMinutes = minutes;
+            }
+
+            strTime = selectedDate.getDate() + "-" + (selectedDate.getMonth() + 1) + "-" + selectedDate.getFullYear() + " " + strHour + ":" + strMinutes;
+        }
+        else {
+            strTime = "Belum dipilih";
+        }
+
+        return (
+            <View style={{paddingHorizontal: 30}}>                
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between"
+                    }}
+                >
+                    <Text
+                        style={{
+                            marginBottom: 0,
+                            marginTop:18,
+                            ...FONTS.Roboto_500Medium,
+                            fontSize: 14,
+                            textTransform: "capitalize",
+                            color: COLORS.black,
+                        }}
+                    >
+                        Pilih tanggal kedatangan #ShukaLovers:
+                    </Text>                    
+                </View>
+                <View
+                    style={{
+                        height: 110,
+                        width: "100%",
+                        borderWidth: 0,
+                        borderRadius: 10,
+                        marginBottom: 18,
+                        marginTop:5,
+                        borderColor: "#D7D7D7",
+                        justifyContent: "left",
+                        paddingHorizontal: 0,
+                    }}
+                >
+                    <Button title="Pilih Tanggal dan Jam" onPress={() => setOpen(true)} containerStyle={{                         
+                        backgroundColor: COLORS.lightBlue, }} />
+
+                    <DatePicker
+                        modal
+                        open={open}
+                        date={new Date()}
+                        onConfirm={(date) => {
+                            setOpen(false);
+                            setSelectedDate(date);
+                        }}
+                        onCancel={() => {
+                            setOpen(false)
+                        }}
+                        minuteInterval={30}
+                        minimumDate={new Date(currentYear, currentMonth, currentDay)}
+                    />
+
+                    <Text
+                        style={{
+                            marginBottom: 0,
+                            marginTop:18,
+                            ...FONTS.Roboto_500Medium,
+                            fontSize: 14,
+                            color: COLORS.black,
+                        }}
+                    >
+                        Tanggal dan Jam yang dipilih:
+                    </Text>  
+                    <Text
+                        style={{
+                            marginBottom: 0,
+                            marginTop:0,
+                            ...FONTS.Roboto_500Medium,
+                            fontSize: 20,
+                            color: COLORS.red,
+                        }}
+                    >                        
+                        {strTime}
+                    </Text>  
+            </View>
+                <View style={{ marginBottom: 27 }}>
+                    <DashedLine
+                        dashLength={10}
+                        dashThickness={1}
+                        dashGap={5}
+                        dashColor={COLORS.gray2}
+                        dashStyle={{ borderRadius: 5 }}
+                    />
+                </View>               
+            </View>
+        )
+    }
+
     return (
         <SafeAreaView style={{ ...SAFEAREAVIEW.AndroidSafeArea, paddingTop: 10 }}>
             <Header title="Order" onPress={() => navigation.navigate("MainLayout")} style={{ marginTop: 20 }} />            
             <ScrollView style={{ flex: 1 }} behavior="padding">
                 {renderSwipeListView()}
                 {renderBranches()}
+                {renderDatePicker()}
                 {renderFooterComponent()}
             </ScrollView>
         </SafeAreaView>
