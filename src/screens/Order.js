@@ -438,57 +438,6 @@ export default function Order(menuId){
         );
     }
 
-    const getMenu = async () => {
-        console.log("getMenu called: " + menuId.route.params.menuId);
-        try {          
-          const requestUrl = baseUrl + '/api/Menu/GetMenu?id=' + menuId.route.params.menuId;
-          console.log(requestUrl);
-          const response = await fetch(requestUrl, 
-            {   
-                method: "GET",       
-                headers: {  "Content-type": "application/json" }
-            });
-          const json = await response.json(); 
-          console.log("getMenu success");
-            console.log(json);
-          setSelectedMenu(json);
-        } catch (error) {
-            console.log("Error: " + error);
-        } finally {
-           
-          setLoading(false);
-          
-        }
-      };
-
-    ///api/Branch/Get
-    const getBranches = async () => {
-        try {          
-          const requestUrl = baseUrl + '/api/Branch/Get';
-          const response = await fetch(requestUrl, 
-            {   
-                method: "GET",       
-                headers: {  "Content-type": "application/json" }
-            });
-          const json = await response.json(); 
-          var objectDropdownArray = [];
-          console.log("Total Branches: " + json.length);
-          for(var i = 0; i < json.length; i++) {
-            objectDropdownArray.push({ 
-                key: json[i].ID,
-                value:json[i].BranchName
-            });
-          }                        
-          setBranches(objectDropdownArray);
-        } catch (error) {
-            console.log("Error: " + error);
-        } finally {
-           
-          setLoading(false);
-          
-        }
-      };
-
     function renderFooterComponent() {
         if(!cart) {
             console.log("cart null");
@@ -705,7 +654,7 @@ export default function Order(menuId){
                     </View>
                 </View>
                 <Button
-                    title="Process to Checkout"
+                    title="RESERVASI SEKARANG"
                     onPress={() => navigation.navigate("PaymentMethodOne")}
                     containerStyle={{ 
                         marginBottom: 33,
@@ -713,22 +662,6 @@ export default function Order(menuId){
                         backgroundColor: COLORS.red, }}
                 />
             </View>
-        );
-    }
-
-    function renderHiddenItem({ data }) {
-        return (
-            <TouchableOpacity
-                style={{
-                    alignSelf: "flex-end",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flex: 1,
-                }}
-                onPress={() => console.log("Remove Item")}
-            >
-                <BasketTwo />
-            </TouchableOpacity>
         );
     }
 
