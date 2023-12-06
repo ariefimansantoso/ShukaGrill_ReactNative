@@ -34,6 +34,7 @@ import VerifyYourPhoneNumber from "./VerifyYourPhoneNumber";
 import ConfirmationCode from "./ConfirmationCode";
 import AddNewCard from "./AddNewCard";
 import ChangePassword from "./ChangePassword";
+import MidtransPayment from "./MidtransPayment";
 
 export {
     OnBoarding,
@@ -72,4 +73,5 @@ export {
     ConfirmationCode,
     AddNewCard,
     ChangePassword,
+    MidtransPayment
 };

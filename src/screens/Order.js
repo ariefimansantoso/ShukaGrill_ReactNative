@@ -95,8 +95,9 @@ export default function Order(menuId){
     const [modalOpen, setModalOpen] = useState(false);
 
     // webview
-    const [isLoading, setLoading] = React.useState(true);
-    
+    const [isLoading, setLoading] = React.useState(false);
+    const [uri, setUri] = useState("");
+
     const httpHeader = {   
         method: "GET",       
         headers: {  "Content-type": "application/json" }
@@ -154,9 +155,11 @@ export default function Order(menuId){
         },
     });
 
-    function renderWebview(uri) {
+    function renderWebview() {
+        console.log("renderWebview");
+        console.log("isLoading: " + isLoading);
         return (
-            <View style={styles.wrapper}>
+            <View style={webviewStyle.wrapper}>
               <WebView
                 source={{ uri: uri }}
                 onLoad={() => setLoading(false)}
@@ -169,7 +172,7 @@ export default function Order(menuId){
                 cacheMode="LOAD_NO_CACHE"
               />
               {isLoading && (
-                <View style={styles.loader}>
+                <View style={webviewStyle.loader}>
                   <ActivityIndicator size='large' color='blue' />
                 </View>
               )}
@@ -301,6 +304,10 @@ export default function Order(menuId){
         console.log("selected Date: " + selectedDate);
     }, [selectedDate]);
 
+    useEffect(() => {
+        renderWebview();
+    }, [uri, isLoading]);
+
     function checkout() {
         let strHour = "";
         let hour = 0;
@@ -398,9 +405,9 @@ export default function Order(menuId){
         const requestCheckoutUrl = baseUrl + '/api/Order/Checkout';       
         return fetch(requestCheckoutUrl, requestCheckoutOptions).then(respx => respx.json())
         .then(transx => {
-            console.log(transx);
-            console.log(transx.User);
-            console.log(transx.Url);
+            //console.log(transx);
+            //console.log(transx.User);
+            //console.log(transx.Url);
             if(transx.User) {
                 let msg = transx.User + "\nKamu harus lengkapi dulu profile kamu.";
                 Alert.alert('Perhatian!', msg, [      
@@ -413,7 +420,9 @@ export default function Order(menuId){
             }
 
             if(transx.Url) {
-                renderWebview(transx.Url);
+                //setUri(transx.Url);
+                //setLoading(true);
+                navigation.navigate("MidtransPayment", { uri: transx.Url });
             }
         });
     }
@@ -1136,11 +1145,12 @@ export default function Order(menuId){
         <SafeAreaView style={{ ...SAFEAREAVIEW.AndroidSafeArea, paddingTop: 10 }}>
             <Header title="Order" onPress={() => navigation.navigate("MainLayout")} style={{ marginTop: 20 }} />            
             <ScrollView style={{ flex: 1 }} behavior="padding">
+                {renderWebview()}
                 {renderSwipeListView()}
                 {renderBranches()}
                 {renderDatePicker()}
                 {renderFooterComponent()}
-                {renderModal()}
+                
             </ScrollView>
         </SafeAreaView>
     );
