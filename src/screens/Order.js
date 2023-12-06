@@ -7,7 +7,9 @@ import {
     TouchableOpacity,
     TextInput,
     KeyboardAvoidingView,
-    StyleSheet
+    StyleSheet,
+    Alert,
+    ActivityIndicator
 } from "react-native";
 import React, { useEffect, useState, useRef }  from "react";
 import { SwipeListView } from "react-native-swipe-list-view";
@@ -20,6 +22,8 @@ import NumericInput from 'react-native-numeric-input'
 import { SelectList } from 'react-native-dropdown-select-list';
 import { Dropdown } from 'react-native-element-dropdown';
 import DatePicker from 'react-native-date-picker'
+import { LoadingModal } from "react-native-loading-modal";
+import { WebView } from 'react-native-webview';
 
 import {
     Header,
@@ -31,7 +35,7 @@ import {
     BasketTwo,
     Star
 } from "../components";
-import { COLORS, SAFEAREAVIEW, FONTS, SIZES, baseUrl, baseImageUrl } from "../constants";
+import { COLORS, SAFEAREAVIEW, FONTS, SIZES, baseUrl, baseImageUrl, getUser } from "../constants";
 
 const dishes = [
     {
@@ -77,6 +81,9 @@ export default function Order(menuId){
 
     const [discountType, setDiscountType] = useState("");
 
+    // current user 
+    const [userEmail, setUserEmail] = useState("");
+
     // dropdown
     const [isFocus, setIsFocus] = useState(false);
 
@@ -84,6 +91,12 @@ export default function Order(menuId){
     const [selectedDate, setSelectedDate] = useState(undefined)
     const [open, setOpen] = useState(false)
 
+    // modal
+    const [modalOpen, setModalOpen] = useState(false);
+
+    // webview
+    const [isLoading, setLoading] = React.useState(true);
+    
     const httpHeader = {   
         method: "GET",       
         headers: {  "Content-type": "application/json" }
@@ -128,6 +141,41 @@ export default function Order(menuId){
           fontSize: 16,
         },
       });
+
+    const webviewStyle = StyleSheet.create({
+        wrapper: {
+            flex: 1,
+        },
+        loader: {
+            position: 'absolute',
+            top: '50%',
+            right: 0,
+            left: 0,
+        },
+    });
+
+    function renderWebview(uri) {
+        return (
+            <View style={styles.wrapper}>
+              <WebView
+                source={{ uri: uri }}
+                onLoad={() => setLoading(false)}
+                javaScriptEnabled={true}
+                javaScriptCanOpenWindowsAutomatically={true}
+                domStorageEnabled={true}
+                cacheEnabled={true}
+                allowFileAccessFromFileURLs={true}
+                allowFileAccess={true}
+                cacheMode="LOAD_NO_CACHE"
+              />
+              {isLoading && (
+                <View style={styles.loader}>
+                  <ActivityIndicator size='large' color='blue' />
+                </View>
+              )}
+            </View>
+          );
+    }
 
     function recalculate() {
         console.log("Calculate");
@@ -231,6 +279,8 @@ export default function Order(menuId){
                         setCart(transx);
                         
                         setDataFetched(true);
+
+                        getUserData();
                     });                            
                 });
             });               
@@ -250,6 +300,137 @@ export default function Order(menuId){
     useEffect(() => {
         console.log("selected Date: " + selectedDate);
     }, [selectedDate]);
+
+    function checkout() {
+        let strHour = "";
+        let hour = 0;
+        let strMinutes = "";
+        let minutes = 0;
+        let strTime = "";
+
+        if(selectedDate != undefined) {
+            strHour = "";
+            hour = selectedDate.getHours();
+            
+            if(hour == 0)
+            {
+                strHour = "00";
+            }
+
+            if(hour < 10) {
+                strHour = "0" + hour;
+            }
+
+            if(hour > 10) {
+                strHour = hour;
+            }
+
+            strMinutes = "";
+            minutes = selectedDate.getMinutes();
+            
+            if(minutes == 0)
+            {
+                strMinutes = "00";
+            }
+
+            if(minutes < 10) {
+                strMinutes = "0" + minutes;
+            }
+
+            if(minutes > 10) {
+                strMinutes = minutes;
+            }
+
+            strTime = selectedDate.getFullYear() + "-" + (selectedDate.getMonth() + 1) + "-" + selectedDate.getDate() + "-" + strHour + "-" + strMinutes;
+        }
+        else {
+            Alert.alert('Perhatian!', 'Kamu belum pilih tanggal dan jam kedatangan', [      
+                {text: 'OK', onPress: () => console.log('OK Pressed')},
+            ]);           
+            return;
+        }
+
+        if(selectedBranch == 0) {
+            Alert.alert('Perhatian!', 'Kamu belum pilih cabang', [      
+                {text: 'OK', onPress: () => console.log('OK Pressed')},
+            ]); 
+            return;
+        }
+
+        const postData = JSON.stringify({
+            "PaxChildren": paxChildren,
+            "Pax": pax,
+            "PaxSenior": paxSenior,
+            "SelectedBranchId": selectedBranch,
+            "TotalPax": (pax + paxChildren + paxSenior),
+            "IsDiskon": discount > 0 ? true : false,
+            "Price": selectedMenu.Price,
+            "ChildrenPrice": selectedMenu.PriceChildren,
+            "SeniorPrice": selectedMenu.PriceSenior,
+            "PaxPrice": pax * selectedMenu.Price,
+            "PaxChildrenPrice": paxChildren * selectedMenu.PriceChildren,
+            "PaxSeniorPrice": paxSenior * selectedMenu.PriceSenior,
+            "TotalPrice": subTotal,
+            "TotalPriceBeforeDiscount": subTotal,
+            "TodayDate": new Date(),
+            "DiscountType": discountType,
+            "Diskon": discount,
+            "TotalAfterDiskon": subtotalAfterDiscount,
+            "PB1": pb1,
+            "ServiceCharge": serviceCharge, 
+            "GrandTotal": grandTotal,
+            "SelectedBranchName": selectedBranchName,
+            "MenuID": selectedMenu.Id,
+            "BranchID": selectedBranch,
+            "OrderForDate": strTime,
+            "OrderEmail": userEmail
+        });
+
+        console.log(postData);
+
+        const requestCheckoutOptions = {   
+            method: "POST",       
+            headers: {  "Content-type": "application/json" },
+            body: postData,
+            redirect: 'follow'
+        };
+       
+        const requestCheckoutUrl = baseUrl + '/api/Order/Checkout';       
+        return fetch(requestCheckoutUrl, requestCheckoutOptions).then(respx => respx.json())
+        .then(transx => {
+            console.log(transx);
+            console.log(transx.User);
+            console.log(transx.Url);
+            if(transx.User) {
+                let msg = transx.User + "\nKamu harus lengkapi dulu profile kamu.";
+                Alert.alert('Perhatian!', msg, [      
+                    {text: 'OK', onPress: () => { 
+                            navigation.navigate('MainLayout', {
+                             openTab: "EditProfile"
+                            });
+                        }},
+                ]); 
+            }
+
+            if(transx.Url) {
+                renderWebview(transx.Url);
+            }
+        });
+    }
+
+    function getUserData() {
+        console.log("checkUser called");
+        (async function() { 
+            userData = await getUser();
+            //console.log("checkUser await done");
+            if(userData) {
+                //console.log(userData.user.email);
+                if(userData.user) {
+                    setUserEmail(userData.user.email);
+                }
+            }
+        })()
+    }
 
     function renderItem(data) {        
         return (            
@@ -655,7 +836,7 @@ export default function Order(menuId){
                 </View>
                 <Button
                     title="RESERVASI SEKARANG"
-                    onPress={() => navigation.navigate("PaymentMethodOne")}
+                    onPress={() => checkout()}
                     containerStyle={{ 
                         marginBottom: 33,
                         marginTop: 30,
@@ -943,6 +1124,14 @@ export default function Order(menuId){
         )
     }
 
+    function renderModal() {
+        let message = "Mohon menunggu...";
+
+        return (
+            <LoadingModal modalVisible={modalOpen} task={message} />
+        )
+    }
+
     return (
         <SafeAreaView style={{ ...SAFEAREAVIEW.AndroidSafeArea, paddingTop: 10 }}>
             <Header title="Order" onPress={() => navigation.navigate("MainLayout")} style={{ marginTop: 20 }} />            
@@ -951,6 +1140,7 @@ export default function Order(menuId){
                 {renderBranches()}
                 {renderDatePicker()}
                 {renderFooterComponent()}
+                {renderModal()}
             </ScrollView>
         </SafeAreaView>
     );

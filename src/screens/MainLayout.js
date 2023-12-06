@@ -23,6 +23,11 @@ export default function MainLayout({ route }) {
         navigation.navigate("Order", { menuId: route.params.menuId });
     }
 
+    if(route.params){
+        console.log(route.params);
+        setSelectedTab(route.params.openTab);
+    }
+    
     return (
         <View style={{ flex: 1 }}>
             
