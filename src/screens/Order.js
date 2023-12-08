@@ -23,7 +23,6 @@ import { SelectList } from 'react-native-dropdown-select-list';
 import { Dropdown } from 'react-native-element-dropdown';
 import DatePicker from 'react-native-date-picker'
 import { LoadingModal } from "react-native-loading-modal";
-import { WebView } from 'react-native-webview';
 
 import {
     Header,
@@ -94,10 +93,6 @@ export default function Order(menuId){
     // modal
     const [modalOpen, setModalOpen] = useState(false);
 
-    // webview
-    const [isLoading, setLoading] = React.useState(false);
-    const [uri, setUri] = useState("");
-
     const httpHeader = {   
         method: "GET",       
         headers: {  "Content-type": "application/json" }
@@ -141,44 +136,7 @@ export default function Order(menuId){
           height: 40,
           fontSize: 16,
         },
-      });
-
-    const webviewStyle = StyleSheet.create({
-        wrapper: {
-            flex: 1,
-        },
-        loader: {
-            position: 'absolute',
-            top: '50%',
-            right: 0,
-            left: 0,
-        },
-    });
-
-    function renderWebview() {
-        console.log("renderWebview");
-        console.log("isLoading: " + isLoading);
-        return (
-            <View style={webviewStyle.wrapper}>
-              <WebView
-                source={{ uri: uri }}
-                onLoad={() => setLoading(false)}
-                javaScriptEnabled={true}
-                javaScriptCanOpenWindowsAutomatically={true}
-                domStorageEnabled={true}
-                cacheEnabled={true}
-                allowFileAccessFromFileURLs={true}
-                allowFileAccess={true}
-                cacheMode="LOAD_NO_CACHE"
-              />
-              {isLoading && (
-                <View style={webviewStyle.loader}>
-                  <ActivityIndicator size='large' color='blue' />
-                </View>
-              )}
-            </View>
-          );
-    }
+      });    
 
     function recalculate() {
         console.log("Calculate");
@@ -192,9 +150,9 @@ export default function Order(menuId){
         let pb1Temp = 0.1 * subtotalAfterDiscountTemp;
         setPb1(pb1Temp);
         let subTotalPlusPb1 = subtotalAfterDiscountTemp + pb1Temp;
-        let serviceChargeTemp = Math.ceil(0.05 * subTotalPlusPb1);
+        let serviceChargeTemp = Math.round(0.05 * subTotalPlusPb1);
         setServiceCharge(serviceChargeTemp);
-        let grandTotalTemp = Math.ceil(subTotalPlusPb1 + serviceChargeTemp);
+        let grandTotalTemp = Math.round(subTotalPlusPb1 + serviceChargeTemp);
         setGrandTotal(grandTotalTemp);
     }
 
@@ -303,10 +261,6 @@ export default function Order(menuId){
     useEffect(() => {
         console.log("selected Date: " + selectedDate);
     }, [selectedDate]);
-
-    useEffect(() => {
-        renderWebview();
-    }, [uri, isLoading]);
 
     function checkout() {
         let strHour = "";
@@ -442,6 +396,7 @@ export default function Order(menuId){
     }
 
     function renderItem(data) {        
+        let minValueItem = 1;
         return (            
             <View
                 style={{
@@ -483,7 +438,7 @@ export default function Order(menuId){
                     <View
                         style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}
                     >
-                        <Text
+                        {/*<Text
                             style={{ ...FONTS.Roboto_500Medium, fontSize: 16 }}
                         >
                             {data.Rating}
@@ -491,7 +446,7 @@ export default function Order(menuId){
                         <View style={{ marginHorizontal: 6 }}>
                             <Star />
                         </View>
-                         {/* <Text
+                          <Text
                             style={{
                                 ...FONTS.Roboto_500Medium,
                                 fontSize: 16,
@@ -583,7 +538,7 @@ export default function Order(menuId){
                             </Text>
                         </View>
                     </View>
-                    <NumericInput minValue={0} initValue={1} onChange={value => {setPax(value);}} />
+                    <NumericInput minValue={1} initValue={pax} onChange={value => {setPax(value);}} />
                 </View>
                 <View
                     style={{
@@ -1145,12 +1100,10 @@ export default function Order(menuId){
         <SafeAreaView style={{ ...SAFEAREAVIEW.AndroidSafeArea, paddingTop: 10 }}>
             <Header title="Order" onPress={() => navigation.navigate("MainLayout")} style={{ marginTop: 20 }} />            
             <ScrollView style={{ flex: 1 }} behavior="padding">
-                {renderWebview()}
                 {renderSwipeListView()}
                 {renderBranches()}
                 {renderDatePicker()}
-                {renderFooterComponent()}
-                
+                {renderFooterComponent()}                
             </ScrollView>
         </SafeAreaView>
     );

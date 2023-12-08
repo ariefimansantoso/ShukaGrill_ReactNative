@@ -3,8 +3,10 @@ import React from "react";
 
 import { SuccessTwo, Button } from "../components";
 import { COLORS, FONTS, SAFEAREAVIEW } from "../constants";
+import { useNavigation } from "@react-navigation/native";
 
 export default function OrderSuccessful() {
+    const navigation = useNavigation();
     return (
         <SafeAreaView style={{ ...SAFEAREAVIEW.AndroidSafeArea }}>
             <ScrollView
@@ -24,11 +26,11 @@ export default function OrderSuccessful() {
                         ...FONTS.Roboto_700Bold,
                         fontSize: 22,
                         textTransform: "capitalize",
-                        color: COLORS.green,
+                        color: COLORS.red,
                         marginBottom: 10,
                     }}
                 >
-                    Order successful!
+                    Order berhasil!
                 </Text>
                 <Text
                     style={{
@@ -39,16 +41,21 @@ export default function OrderSuccessful() {
                         marginBottom: 21,
                     }}
                 >
-                    Your order will be delivered on time. Thank you!
+                    Order kamu sudah dicatat dan kamu akan menerima konfirmasi email!
                 </Text>
                 <Button
-                    title="View orders"
-                    containerStyle={{ marginBottom: 15 }}
+                    title="Daftar Orderku"
+                    containerStyle={{ marginBottom: 15, backgroundColor: COLORS.lightRed }}
+                    textStyle={{ color: COLORS.red }}
+                    onPress={() => navigation.navigate("MainLayout", {
+                        openTab: "OrderHistory"
+                    })}
                 />
                 <Button
-                    title="Continue Shopping"
-                    containerStyle={{ backgroundColor: COLORS.lightGreen }}
-                    textStyle={{ color: COLORS.green }}
+                    title="Order lagi"
+                    containerStyle={{ backgroundColor: COLORS.red }}
+                    textStyle={{ color: COLORS.white }}
+                    onPress={() => navigation.navigate("MainLayout")}
                 />
             </ScrollView>
         </SafeAreaView>

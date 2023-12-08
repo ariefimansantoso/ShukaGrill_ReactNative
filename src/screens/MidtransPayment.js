@@ -9,11 +9,6 @@ export default function MidtransPayment({ route }) {
     console.log(uri);
     console.log(route);
 
-    if(uri.indexOf("order_id") > -1) {
-        // http://example.com/?order_id=SHUKAKU-061220230246175871&status_code=201&transaction_status=pending
-        let order_id = getParameterByName("order_id", uri)
-        navigation.navigate("OrderSuccessful");
-    }
     return (
         <SafeAreaView style={{ flex: 1 }}>
           <WebView 
@@ -29,7 +24,7 @@ export default function MidtransPayment({ route }) {
                 console.log(data.url);
                 if(data.url.indexOf("order_id") > -1) {
                     // http://example.com/?order_id=SHUKAKU-061220230246175871&status_code=201&transaction_status=pending
-                    let order_id = getParameterByName("order_id", data.url)
+                    let order_id = getParameterByName("order_id", data.url);                    
                     navigation.navigate("OrderSuccessful");
                 }
             }}

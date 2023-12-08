@@ -78,7 +78,7 @@ export default function EditProfile() {
                         backgroundColor: COLORS.red,
                         marginBottom: 20,
                     }}
-                    onPress={() => navigation.goBack()}
+                    onPress={() => navigation.navigate("OrderSuccessful")}
                 />
                 {/* <TouchableOpacity
                     onPress={() => navigation.navigate("ChangePassword")}

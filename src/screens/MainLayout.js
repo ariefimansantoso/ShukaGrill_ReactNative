@@ -11,26 +11,32 @@ import Contact from "../screens/Contact";
 import EditProfile from "../screens/EditProfile";
 import OrderHistory from "../screens/OrderHistory";
 import Order from "../screens/Order";
+import OrderSuccessful  from "./OrderSuccessful";
 
 export default function MainLayout({ route }) {
     const navigation = useNavigation();
-    const [selectedTab, setSelectedTab] = useState("FoodDetails");
+    const [selectedTab, setSelectedTab] = useState(route && route.params ? route.params.openTab : "FoodDetails");
     //const { openTab, menuId } = route.params;
     //console.log("route params: " + route.params);
     //console.log("selectdTab: " + selectedTab);
 
-    if(route.params && selectedTab != "Order") {
+    /* if(route.params && selectedTab != "Order") {
         navigation.navigate("Order", { menuId: route.params.menuId });
-    }
+    } */
+    //console.log("openTab: " + route.params.openTab);
+    /* if(route.params){
+        //console.log("params: " + JSON.stringify(route.params));
+        if(route.params.openTab != selectedTab) {
+            //console.log("openTab: " + JSON.stringify(route.params.openTab));
+            setSelectedTab(route.params.openTab);
+            navigation.setParams(undefined);
+        }
+    }    */
 
-    if(route.params){
-        console.log(route.params);
-        setSelectedTab(route.params.openTab);
-    }
-    
     return (
+        
         <View style={{ flex: 1 }}>
-            
+            {console.log("selectedTab: " + selectedTab)}
             {selectedTab == "Order" && <Order menuId={route.params.menuId} />}
             {/* {selectedTab == "Cart" && <CartIsEmpty />} */}
             {selectedTab == "FoodDetails" && <FoodDetails />}
@@ -51,14 +57,11 @@ export default function MainLayout({ route }) {
                 }}
             >
                 {tabs.map((item, index) => {
+                    //console.log(item);
                     return (
                         <TouchableOpacity
                             key={index}
-                            onPress={() => function() {
-                                    console.log("Menu pressed");
-                                    route = undefined;
-                                    setSelectedTab(item.screen);    
-                                }                                
+                            onPress={() => setSelectedTab(item.screen)                     
                             }
                         >
                             <Image
