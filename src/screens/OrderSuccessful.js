@@ -55,7 +55,9 @@ export default function OrderSuccessful() {
                     title="Order lagi"
                     containerStyle={{ backgroundColor: COLORS.red }}
                     textStyle={{ color: COLORS.white }}
-                    onPress={() => navigation.navigate("MainLayout")}
+                    onPress={() => navigation.navigate("MainLayout", {
+                        openTab: "FoodDetails"
+                    })}
                 />
             </ScrollView>
         </SafeAreaView>

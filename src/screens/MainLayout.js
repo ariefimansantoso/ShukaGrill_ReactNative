@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 
 import { tabs, COLORS, FONTS, dishes } from "../constants";
@@ -24,18 +24,23 @@ export default function MainLayout({ route }) {
         navigation.navigate("Order", { menuId: route.params.menuId });
     } */
     //console.log("openTab: " + route.params.openTab);
-    /* if(route.params){
+     if(route.params){
         //console.log("params: " + JSON.stringify(route.params));
         if(route.params.openTab != selectedTab) {
-            //console.log("openTab: " + JSON.stringify(route.params.openTab));
+            console.log("openTab: " + JSON.stringify(route.params.openTab));
             setSelectedTab(route.params.openTab);
-            navigation.setParams(undefined);
+            //navigation.setParams(undefined);
         }
-    }    */
+    }    
+
+    useEffect(() => {
+        console.log("here");
+        //navigation.setParams({ route: undefined });
+    }, [selectedTab]);
 
     return (
         
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>        
             {console.log("selectedTab: " + selectedTab)}
             {selectedTab == "Order" && <Order menuId={route.params.menuId} />}
             {/* {selectedTab == "Cart" && <CartIsEmpty />} */}
@@ -61,8 +66,11 @@ export default function MainLayout({ route }) {
                     return (
                         <TouchableOpacity
                             key={index}
-                            onPress={() => setSelectedTab(item.screen)                     
-                            }
+                            onPress={() => {
+                                console.log("item.screen: " + item.screen);
+                                navigation.setParams({ openTab: item.screen });                                
+                                setSelectedTab(item.screen);
+                            }}
                         >
                             <Image
                                 source={item.icon}

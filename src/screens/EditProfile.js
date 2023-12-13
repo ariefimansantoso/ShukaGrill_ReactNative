@@ -5,16 +5,73 @@ import {
     SafeAreaView,
     Text,
     TouchableOpacity,
+    Alert,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { EditProfileCategory, Header, Button } from "../components";
-import { SAFEAREAVIEW, FONTS, COLORS, SIZES } from "../constants";
+import { SAFEAREAVIEW, FONTS, COLORS, SIZES, getUser, baseUrl } from "../constants";
 
 export default function EditProfile() {
     const navigation = useNavigation();
+
+    // current user 
+    const [userEmail, setUserEmail] = useState("");
+    const [fullname, setFullname] = useState("");
+    const [lastname, setLastname] = useState("");
+
+    function getUserData() {
+        console.log("checkUser called");
+        (async function() { 
+            userData = await getUser();
+            //console.log("checkUser await done");
+            if(userData) {
+                //console.log(userData.user.email);
+                if(userData.user) {
+                    setUserEmail(userData.user.email);
+                    console.log(userData.user.email);
+                }
+            }
+        })()
+    }
+
+    useEffect(() => {
+        getUserData();
+    }, []);
+
+    useEffect(() => {
+        getProfile();
+    }, [userEmail]);
+
+    function getProfile() {
+        const requestCheckoutOptions = {   
+            method: "GET",       
+            headers: {  "Content-type": "application/json" },
+            redirect: 'follow'
+        };
+       
+        console.log("getProfile: " + userEmail);
+        const requestCheckoutUrl = baseUrl + '/api/Profile?email=' + userEmail;       
+        return fetch(requestCheckoutUrl, requestCheckoutOptions).then(respx => respx.json())
+        .then(transx => {
+            console.log("transx: " + JSON.stringify(transx));
+            //console.log(transx.User);
+            //console.log(transx.Url);
+            if(transx.User) {
+                let msg = transx.User + "\nKamu harus login dulu dengan Gmail kamu.";
+                Alert.alert('Perhatian!', msg, [      
+                    {text: 'OK', onPress: () => { 
+                            navigation.navigate('OnBoarding');
+                        }},
+                ]); 
+            }
+
+            setFullname(transx.FullName);
+            setLastname(transx.LastName);        
+        });
+    }
 
     function renderHeader() {
         return (
@@ -52,7 +109,7 @@ export default function EditProfile() {
             >
                 <EditProfileCategory
                     title="Nama Depan"
-                    placeholder="Arief Iman"
+                    va
                 />
                 <EditProfileCategory
                     title="Nama Belakang"
@@ -78,7 +135,11 @@ export default function EditProfile() {
                         backgroundColor: COLORS.red,
                         marginBottom: 20,
                     }}
-                    onPress={() => navigation.navigate("OrderSuccessful")}
+                    onPress={() => {
+                        
+                       
+
+                    }}
                 />
                 {/* <TouchableOpacity
                     onPress={() => navigation.navigate("ChangePassword")}
