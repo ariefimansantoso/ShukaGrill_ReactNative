@@ -1,9 +1,9 @@
 import { View, Text, TextInput } from "react-native";
-import React from "react";
+import React, { setState } from "react";
 
 import { COLORS, FONTS, SIZES } from "../constants";
 
-export default function EditProfileCategory({ title, placeholder }) {
+export default function EditProfileCategory({ title, placeholder, value, funcSetValue }) {
     return (
         <View style={{ width: "100%", marginBottom: 18 }}>
             <Text
@@ -27,7 +27,7 @@ export default function EditProfileCategory({ title, placeholder }) {
                     justifyContent: "center",
                 }}
             >
-                <TextInput placeholder={placeholder} style={{ flex: 1 }} />
+                <TextInput placeholder={placeholder} style={{ flex: 1 }} defaultValue={value.toString()} onChangeText={funcSetValue} />
             </View>
         </View>
     );

@@ -4,16 +4,87 @@ import {
     SafeAreaView,
     ScrollView,
     TouchableOpacity,
+    Alert
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 
 import { Header, OrderHistoryCategory } from "../components";
-import { COLORS, FONTS, SAFEAREAVIEW, history, SIZES } from "../constants";
+import { COLORS, FONTS, SAFEAREAVIEW, history, SIZES, getUser, baseUrl } from "../constants";
 
 export default function OrderHistory() {
     const [category, setCategory] = useState("upcoming");
     const navigation = useNavigation();
+
+    // current user 
+    const [userEmail, setUserEmail] = useState("");
+
+    // orders
+    const [orders, setOrders] = useState([]);
+    const [previousOrders, setPreviousOrders] = useState([]);
+
+    function getUserData() {
+        console.log("checkUser called");
+        (async function() { 
+            userData = await getUser();
+            //console.log("checkUser await done");
+            if(userData) {
+                //console.log(userData.user.email);
+                if(userData.user) {
+                    setUserEmail(userData.user.email);
+                    console.log(userData.user.email);
+                }
+            }
+        })()
+    }
+
+    useEffect(() => {
+        getUserData();
+        getOrders();
+    }, [userEmail]);
+
+    function getOrders() {
+        if(!userEmail) {
+            return;
+        }
+
+
+        const requestCheckoutOptions = {   
+            method: "GET",       
+            headers: {  "Content-type": "application/json" },
+            redirect: 'follow'
+        };
+       
+        console.log("getOrders: " + userEmail);
+        const requestCheckoutUrl = baseUrl + '/api/Order/Orders?email=' + userEmail;       
+        return fetch(requestCheckoutUrl, requestCheckoutOptions).then(respx => respx.json())
+        .then(transx => {
+            //console.log(transx);
+            //console.log(transx.User);
+            //console.log(transx.Url);
+            if(transx.Message) {
+                Alert.alert('Perhatian!', "Mohoh maaf, telah terjadi kendala, mohon diulang kembali. Apabila kendala masih ada, silakan hubungi kami melalui menu Kontak", [      
+                    {text: 'Cancel'},
+                ],
+                {cancelable: false});                 
+            }
+
+            let tempUpcomingOrders = [];
+            let tempHistoryOrders = [];
+            for(var i = 0; i < transx.length; i++){
+                if(transx[i].IsUpcoming) {
+                    tempUpcomingOrders.push(transx[i]);
+                }
+                else {
+                    tempHistoryOrders.push(transx[i]);
+                }
+            }
+            console.log(tempHistoryOrders.length);
+            console.log(tempUpcomingOrders.length);
+            setOrders(tempUpcomingOrders);
+            setPreviousOrders(tempHistoryOrders);
+        });
+    }
 
     function renderCategory() {
         return (
@@ -84,9 +155,10 @@ export default function OrderHistory() {
     }
 
     function renderUpcoming() {
-        return history.map((item, index) => {
+        return orders.map((item, index) => {
+
             return (
-                item.upcoming === true && (
+                item.IsUpcoming === true && (
                     <View key={index}>
                         <OrderHistoryCategory item={item} type={"upcoming"} />
                     </View>
@@ -96,9 +168,9 @@ export default function OrderHistory() {
     }
 
     function renderHistory() {
-        return history.map((item, index) => {
+        return previousOrders.map((item, index) => {
             return (
-                item.completed === true && (
+                item.IsUpcoming === false && (
                     <View key={index}>
                         <OrderHistoryCategory item={item} type={"completed"} />
                     </View>

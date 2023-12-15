@@ -21,6 +21,8 @@ export default function EditProfile() {
     const [userEmail, setUserEmail] = useState("");
     const [fullname, setFullname] = useState("");
     const [lastname, setLastname] = useState("");
+    const [address, setAddress] = useState("");
+    const [phone, setPhone] = useState("");
 
     function getUserData() {
         console.log("checkUser called");
@@ -39,13 +41,15 @@ export default function EditProfile() {
 
     useEffect(() => {
         getUserData();
-    }, []);
-
-    useEffect(() => {
         getProfile();
     }, [userEmail]);
 
     function getProfile() {
+        if(!userEmail) {
+            return;
+        }
+
+
         const requestCheckoutOptions = {   
             method: "GET",       
             headers: {  "Content-type": "application/json" },
@@ -60,7 +64,7 @@ export default function EditProfile() {
             //console.log(transx.User);
             //console.log(transx.Url);
             if(transx.User) {
-                let msg = transx.User + "\nKamu harus login dulu dengan Gmail kamu.";
+                let msg = "Kamu belum punya profile, harus login dulu dengan Gmail kamu.";
                 Alert.alert('Perhatian!', msg, [      
                     {text: 'OK', onPress: () => { 
                             navigation.navigate('OnBoarding');
@@ -69,7 +73,61 @@ export default function EditProfile() {
             }
 
             setFullname(transx.FullName);
-            setLastname(transx.LastName);        
+            setLastname(transx.LastName);   
+            setAddress(transx.Address);
+            setPhone(transx.PhoneNumber);
+        });
+    }
+
+    function saveProfile() {
+
+        const postData = JSON.stringify({
+            "FullName": fullname,
+            "LastName": lastname,
+            "Address": address,
+            "Email": userEmail
+        });
+
+        //console.log(postData);
+        var urlencoded = new URLSearchParams();
+        urlencoded.append("FullName", fullname);
+        urlencoded.append("LastName", lastname);
+        urlencoded.append("Address", address);
+        urlencoded.append("Email", userEmail);
+
+        const requestCheckoutOptions = {   
+            method: "POST",       
+            headers: {  "Content-type": "application/json" },
+            body: postData,
+            redirect: 'follow'
+        };
+        console.log(requestCheckoutOptions);
+        const requestCheckoutUrl = baseUrl + '/api/Profile';       
+        fetch(requestCheckoutUrl, requestCheckoutOptions).then(respx => respx.json())
+        .then(transx => {
+            console.log("transx: " + JSON.stringify(transx));
+            //console.log(transx.User);
+            //console.log(transx.Url);
+            if(transx.User) {
+                if(transx.User == "updated") {
+                    let msg = "Profile kamu telah sukses di update.";
+                    Alert.alert('Perhatian!', msg, [      
+                        {text: 'OK', onPress: () => { 
+                                navigation.navigate('MainLayout', {
+                                    openTab: "EditProfile"
+                                });
+                            }},
+                    ]); 
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log('error', error);
+            Alert.alert('Perhatian!', "Mohoh maaf, telah terjadi kendala, mohon diulang kembali. Apabila kendala masih ada, silakan hubungi kami melalui menu Kontak", [      
+                {text: 'Cancel'},
+            ],
+            {cancelable: false});    
         });
     }
 
@@ -109,23 +167,24 @@ export default function EditProfile() {
             >
                 <EditProfileCategory
                     title="Nama Depan"
-                    va
+                    value={fullname.toString()}
+                    funcSetValue={value => setFullname(value)}
                 />
                 <EditProfileCategory
                     title="Nama Belakang"
-                    placeholder="Santoso"
+                    value={lastname}
                 />
                 <EditProfileCategory
                     title="Email"
-                    placeholder="ariefimansantoso@gmail.com"
+                    value={userEmail}
                 />
                 <EditProfileCategory
                     title="Address"
-                    placeholder="Jln. Kasuari VI blok HB7/17"
+                    value={address}
                 />
                 <EditProfileCategory
                     title="Phone Number"
-                    placeholder="+6281218550163"
+                    value={phone}
                 />                
                 
                 
@@ -135,11 +194,7 @@ export default function EditProfile() {
                         backgroundColor: COLORS.red,
                         marginBottom: 20,
                     }}
-                    onPress={() => {
-                        
-                       
-
-                    }}
+                    onPress={() => saveProfile()}
                 />
                 {/* <TouchableOpacity
                     onPress={() => navigation.navigate("ChangePassword")}

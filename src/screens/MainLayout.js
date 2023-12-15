@@ -33,11 +33,6 @@ export default function MainLayout({ route }) {
         }
     }    
 
-    useEffect(() => {
-        console.log("here");
-        //navigation.setParams({ route: undefined });
-    }, [selectedTab]);
-
     return (
         
         <View style={{ flex: 1 }}>        

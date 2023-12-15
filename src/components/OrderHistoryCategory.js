@@ -1,8 +1,13 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
-import { COLORS, FONTS } from "../constants";
+import { COLORS, FONTS, baseImageUrl } from "../constants";
 
 export default function OrderHistoryCategory({ item, type }) {
+    let totalPax = (item.ChildrenPax == null ? 0 : item.ChildrenPax) + item.Pax + (item.SeniorPax == null ? 0 : item.SeniorPax);
+    let orderForDate = new Date(item.OrderForDate);
+    let orderForDateStr = orderForDate.getDate() + "-" + (parseInt(orderForDate.getMonth()) + 1) + "-" + orderForDate.getFullYear();
+
+    
     return (
         <View
             style={{
@@ -18,7 +23,7 @@ export default function OrderHistoryCategory({ item, type }) {
             }}
         >
             <Image
-                source={{ uri: item.image }}
+                source={{ uri: item.MenuPhotoUrl == null ? "https://www.shukagrill.com/backend/Content/images/banner/spesial.png" : baseImageUrl + item.MenuPhotoUrl }}
                 style={{
                     width: 65,
                     height: 65,
@@ -42,7 +47,7 @@ export default function OrderHistoryCategory({ item, type }) {
                             flex: 1,
                         }}
                     >
-                        {item.date}
+                        {orderForDateStr}
                     </Text>
                     <View
                         style={{
@@ -59,7 +64,7 @@ export default function OrderHistoryCategory({ item, type }) {
                             fontSize: 13,
                             color: COLORS.gray2,
                         }}
-                    >{`${item.quantity} Pax: `}</Text>
+                    >{`${totalPax} Pax: `}</Text>
                     <Text
                         style={{
                             ...FONTS.Roboto_700Bold,
@@ -67,7 +72,7 @@ export default function OrderHistoryCategory({ item, type }) {
                             color: COLORS.carrot,
                         }}
                     >
-                        {item.price.toLocaleString("id-ID")}
+                        {item.OrderTotal != null ? item.OrderTotal.toLocaleString("id-ID") : 0}
                     </Text>
                 </View>
 
@@ -79,7 +84,7 @@ export default function OrderHistoryCategory({ item, type }) {
                         color: COLORS.black,
                     }}
                 >
-                    {item.name}
+                    {`${item.BranchName}`} 
                 </Text>
                 <View
                     style={{
