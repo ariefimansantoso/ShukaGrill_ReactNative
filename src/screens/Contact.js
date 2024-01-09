@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
 } from "react-native";
 import React, { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, Link } from "@react-navigation/native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Modal from "react-native-modal";
 
@@ -49,7 +49,38 @@ export default function ForgotPassword() {
                     contaynerStyle={{ marginBottom: 30 }}
                        
                 />
-                {/* <Button title="Send" onPress={() => setShowModal(true)} /> */}
+                
+                <TouchableOpacity
+                    onPress={() => navigation.navigate("Privacy")}
+                >
+                    <Text
+                        style={{
+                            ...FONTS.Roboto_400Regular,
+                            fontSize: 16,
+                            textAlign: "center",
+                            color: COLORS.red,
+                        }}
+                    >
+                        Kebijakan Privasi
+                    </Text>
+                </TouchableOpacity>
+
+
+                <TouchableOpacity
+                    onPress={() => navigation.navigate("Terms")}
+                >
+                    <Text
+                        style={{
+                            ...FONTS.Roboto_400Regular,
+                            fontSize: 16,
+                            textAlign: "center",
+                            color: COLORS.red,
+                            marginTop: 25
+                        }}
+                    >
+                        Syarat dan Ketentuan
+                    </Text>
+                </TouchableOpacity>
             </KeyboardAwareScrollView>
         );
     }

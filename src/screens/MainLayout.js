@@ -27,7 +27,7 @@ export default function MainLayout({ route }) {
      if(route.params){
         //console.log("params: " + JSON.stringify(route.params));
         if(route.params.openTab != selectedTab) {
-            console.log("openTab: " + JSON.stringify(route.params.openTab));
+            //console.log("openTab: " + JSON.stringify(route.params.openTab));
             setSelectedTab(route.params.openTab);
             //navigation.setParams(undefined);
         }

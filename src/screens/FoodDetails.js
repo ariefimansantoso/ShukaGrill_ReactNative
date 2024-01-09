@@ -95,7 +95,7 @@ export default function FoodDetails() {
                     <View
                         style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}
                     >
-                        <Text
+                        {/*<Text
                             style={{ ...FONTS.Roboto_500Medium, fontSize: 16 }}
                         >
                             {dish.Rating}
@@ -103,7 +103,7 @@ export default function FoodDetails() {
                         <View style={{ marginHorizontal: 6 }}>
                             <Star />
                         </View>
-                        {/* <Text
+                         <Text
                             style={{
                                 ...FONTS.Roboto_500Medium,
                                 fontSize: 16,

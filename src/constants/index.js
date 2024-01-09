@@ -8,7 +8,8 @@ import {
     baseUrl, 
     baseImageUrl, 
     storeUser,
-    getUser
+    getUser,
+    logoutUser
 } from "./constants";
 import { COLORS, SIZES, FONTS, SAFEAREAVIEW } from "./theme";
 import { dummyData, dishes } from "./dummyData";
@@ -28,5 +29,6 @@ export {
     promocodes,
     baseUrl, baseImageUrl, 
     storeUser,
-    getUser
+    getUser,
+    logoutUser
 };

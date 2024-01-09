@@ -7,6 +7,8 @@ import {
     Alert
 } from "react-native";
 import React, { useEffect, useState } from "react";
+
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
 
 import { Header, OrderHistoryCategory } from "../components";
@@ -154,29 +156,75 @@ export default function OrderHistory() {
         );
     }
 
-    function renderUpcoming() {
-        return orders.map((item, index) => {
+    function renderContent() {
+        return (
+            <KeyboardAwareScrollView
+                contentContainerStyle={{
+                    flexGrow: 1,
+                    paddingHorizontal: 30,
+                    paddingVertical: SIZES.paddingVertical,
+                }}
+                showsVerticalScrollIndicator={false}
+            >                
 
+                <Text
+                    style={{
+                        textAlign: "left",
+                        ...FONTS.Roboto_400Regular,
+                        fontSize: 16,
+                        color: COLORS.red,
+                        marginBottom: 25,
+                        lineHeight: 16 * 1.5,
+                    }}
+                >
+                    Belum ada order.
+                </Text>
+
+                </KeyboardAwareScrollView>
+
+        );
+    }
+
+    function renderUpcoming() {
+        if(orders.length > 0) {
+            return orders.map((item, index) => {
+                return (
+                    item.IsUpcoming === true && (
+                        <View key={index}>
+                            <OrderHistoryCategory item={item} type={"upcoming"} />
+                        </View>
+                    )
+                );
+            });
+        }
+        else {
             return (
-                item.IsUpcoming === true && (
-                    <View key={index}>
-                        <OrderHistoryCategory item={item} type={"upcoming"} />
-                    </View>
-                )
+                <SafeAreaView style={{ ...SAFEAREAVIEW.AndroidSafeArea }}>                    
+                    {renderContent()}
+                </SafeAreaView>
             );
-        });
+        }
     }
 
     function renderHistory() {
-        return previousOrders.map((item, index) => {
+        if(previousOrders.length > 0) {
+            return previousOrders.map((item, index) => {
+                return (
+                    item.IsUpcoming === false && (
+                        <View key={index}>
+                            <OrderHistoryCategory item={item} type={"completed"} />
+                        </View>
+                    )
+                );
+            });
+        }
+        else {
             return (
-                item.IsUpcoming === false && (
-                    <View key={index}>
-                        <OrderHistoryCategory item={item} type={"completed"} />
-                    </View>
-                )
+                <SafeAreaView style={{ ...SAFEAREAVIEW.AndroidSafeArea }}>                    
+                    {renderContent()}
+                </SafeAreaView>
             );
-        });
+        }
     }
 
     function renderHeader() {

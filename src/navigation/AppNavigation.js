@@ -40,7 +40,9 @@ import {
     ConfirmationCode,
     AddNewCard,
     ChangePassword,
-    MidtransPayment
+    MidtransPayment,
+    Privacy,
+    Terms
 } from "../screens";
 
 const Stack = createStackNavigator();
@@ -134,6 +136,14 @@ export default function Navigation() {
                 <Stack.Screen
                     name="MidtransPayment"
                     component={MidtransPayment}
+                />
+                <Stack.Screen
+                    name="Privacy"
+                    component={Privacy}
+                />
+                <Stack.Screen
+                    name="Terms"
+                    component={Terms}
                 />
             </Stack.Navigator>
             <FlashMessage position="top" />

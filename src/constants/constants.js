@@ -226,16 +226,26 @@ const storeUser = async (value) => {
     }
   };
 
-    // getting data
-    const getUser = async () => {
-        try {
-            return JSON.parse(await AsyncStorage.getItem(STORAGE_KEY));
-        } catch (error) {
-            console.log(error); 
-        }
-    };
+// getting data
+const getUser = async () => {
+    try {
+        return JSON.parse(await AsyncStorage.getItem(STORAGE_KEY));
+    } catch (error) {
+        console.log(error); 
+    }
+};
+
+const logoutUser = async () => {
+    try {
+        await AsyncStorage.removeItem(STORAGE_KEY);
+        return true;
+    }
+    catch(exception) {
+        return false;
+    }
+}
 
 //const baseUrl = "https://api.shukagrillapp.com";
 const baseUrl = "https://api.shukagrillapp.com";
 const baseImageUrl = "https://backend.shukagrillapp.com";
-export { onboarding, tabs, category, history, favorite, promocodes, baseUrl, baseImageUrl, storeUser, getUser };
+export { onboarding, tabs, category, history, favorite, promocodes, baseUrl, baseImageUrl, storeUser, getUser, logoutUser };

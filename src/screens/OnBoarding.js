@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Image, StyleSheet, Br, AsyncStorage } from "react-native";
+import { View, Text, FlatList, Image, StyleSheet, Br, AsyncStorage, Alert } from "react-native";
 //import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -72,12 +72,13 @@ export default function OnBoarding() {
     }
 
     function checkUser() {
-        //console.log("checkUser called");
+        console.log("Onboarding checkUser called");
         (async function() { 
             userData = await getUser();
-            //console.log("checkUser await done");
+            console.log("checkUser await done");
+            console.log("userData: " + userData);
             if(userData) {
-                //console.log("token: " + userData.idToken);
+                console.log("token: " + userData.idToken);
                 if(userData.idToken) {
                     navigation.navigate("MainLayout");
                 }
@@ -171,7 +172,8 @@ export default function OnBoarding() {
                                             GoogleSignin.configure({
                                                 scopes: ["https://www.googleapis.com/auth/userinfo.profile"],
                                                 androidClientId: '531501383860-ejt27c9qkhe0699b954dpmp882rrasmo.apps.googleusercontent.com',
-                                                webClientId: '531501383860-uoebtfaqee29oe69r46tl4a6ndr95ike.apps.googleusercontent.com'
+                                                //androidClientId: '531501383860-r23pj79ivrefj7h7q8qv4sgh5j1dtlot.apps.googleusercontent.com',
+                                                webClientId: '531501383860-uoebtfaqee29oe69r46tl4a6ndr95ike.apps.googleusercontent.com',                                            
                                             });
 
                                             GoogleSignin.hasPlayServices().then((hasPlayService) => {
@@ -182,10 +184,13 @@ export default function OnBoarding() {
                                                         navigation.navigate("MainLayout");
                                                     }).catch((e) => {
                                                         console.log("ERROR hasPlayServices: " + JSON.stringify(e));
+                                                        let msg = "ERROR hasPlayServices: " + JSON.stringify(e);
+                                                        Alert.alert('Perhatian!', msg, [{ text: 'OK' }]);
                                                     })
                                                 }
                                             }).catch((e) => {
                                                 console.log("ERROR IS: " + JSON.stringify(e));
+                                                Alert.alert('Perhatian!', "ERROR IS: " + JSON.stringify(e), [{ text: 'OK' }]);
                                             })
                                         }
                                     }

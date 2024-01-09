@@ -35,6 +35,8 @@ import ConfirmationCode from "./ConfirmationCode";
 import AddNewCard from "./AddNewCard";
 import ChangePassword from "./ChangePassword";
 import MidtransPayment from "./MidtransPayment";
+import Privacy from "./Privacy";
+import Terms from "./Terms";
 
 export {
     OnBoarding,
@@ -73,5 +75,7 @@ export {
     ConfirmationCode,
     AddNewCard,
     ChangePassword,
-    MidtransPayment
+    MidtransPayment,
+    Privacy,
+    Terms
 };

@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { EditProfileCategory, Header, Button } from "../components";
-import { SAFEAREAVIEW, FONTS, COLORS, SIZES, getUser, baseUrl } from "../constants";
+import { SAFEAREAVIEW, FONTS, COLORS, SIZES, getUser, baseUrl, logoutUser } from "../constants";
 
 export default function EditProfile() {
     const navigation = useNavigation();
@@ -24,8 +24,10 @@ export default function EditProfile() {
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
 
+    let loggedOut = false;
+
     function getUserData() {
-        console.log("checkUser called");
+        console.log("EditProfile checkUser called");
         (async function() { 
             userData = await getUser();
             //console.log("checkUser await done");
@@ -63,13 +65,18 @@ export default function EditProfile() {
             console.log("transx: " + JSON.stringify(transx));
             //console.log(transx.User);
             //console.log(transx.Url);
-            if(transx.User) {
-                let msg = "Kamu belum punya profile, harus login dulu dengan Gmail kamu.";
+            if(transx.User == "null") {
+                /* let msg = "Kamu belum punya profile, harus login dulu dengan Gmail kamu.";
                 Alert.alert('Perhatian!', msg, [      
                     {text: 'OK', onPress: () => { 
                             navigation.navigate('OnBoarding');
                         }},
-                ]); 
+                ]);  */
+                setFullname("");
+                setLastname("");   
+                setAddress("");
+                setPhone("");
+                return;
             }
 
             setFullname(transx.FullName);
@@ -79,13 +86,22 @@ export default function EditProfile() {
         });
     }
 
+    function logoffUser() {        
+        loggedOut = logoutUser();
+        //console.log("checkUser await done");
+        if(loggedOut) {
+            navigation.navigate("OnBoarding");
+        }
+    }
+
     function saveProfile() {
 
         const postData = JSON.stringify({
             "FullName": fullname,
             "LastName": lastname,
             "Address": address,
-            "Email": userEmail
+            "Email": userEmail,
+            "PhoneNumber": phone
         });
 
         //console.log(postData);
@@ -94,6 +110,7 @@ export default function EditProfile() {
         urlencoded.append("LastName", lastname);
         urlencoded.append("Address", address);
         urlencoded.append("Email", userEmail);
+        urlencoded.append("PhoneNumber", phone);
 
         const requestCheckoutOptions = {   
             method: "POST",       
@@ -120,7 +137,12 @@ export default function EditProfile() {
                     ]); 
                 }
             }
-
+            else {
+                Alert.alert('Perhatian!', "Mohoh maaf, telah terjadi kendala simpan profile, mohon diulang kembali. Apabila kendala masih ada, silakan hubungi kami melalui menu Kontak", [      
+                    {text: 'Cancel'},
+                ],
+                {cancelable: false}); 
+            }
         })
         .catch(error => {
             console.log('error', error);
@@ -173,6 +195,7 @@ export default function EditProfile() {
                 <EditProfileCategory
                     title="Nama Belakang"
                     value={lastname}
+                    funcSetValue={value => setLastname(value)}
                 />
                 <EditProfileCategory
                     title="Email"
@@ -181,10 +204,12 @@ export default function EditProfile() {
                 <EditProfileCategory
                     title="Address"
                     value={address}
+                    funcSetValue={value => setAddress(value)}
                 />
                 <EditProfileCategory
                     title="Phone Number"
                     value={phone}
+                    funcSetValue={value => setPhone(value)}
                 />                
                 
                 
@@ -195,6 +220,15 @@ export default function EditProfile() {
                         marginBottom: 20,
                     }}
                     onPress={() => saveProfile()}
+                />
+
+                <Button
+                    title="Logoff/Keluar"
+                    containerStyle={{
+                        backgroundColor: COLORS.red,
+                        marginBottom: 20,
+                    }}
+                    onPress={() => logoffUser()}
                 />
                 {/* <TouchableOpacity
                     onPress={() => navigation.navigate("ChangePassword")}
